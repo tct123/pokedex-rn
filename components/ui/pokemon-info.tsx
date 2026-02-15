@@ -1,5 +1,4 @@
-import { TextColors } from "@/constants/theme";
-import { View, Text, ImageSourcePropType, ViewStyle, StyleProp } from "react-native";
+import { View, Text, ImageSourcePropType } from "react-native";
 import { Badge } from "./badge";
 
 export interface PokemonInfoProps {
@@ -10,39 +9,19 @@ export interface PokemonInfoProps {
     icon: ImageSourcePropType;
     foregroundColor: string;
   }[];
-  style?: StyleProp<ViewStyle>
+  className?: string;
 }
 
-export default function PokemonInfo({ id, name, types, style }: PokemonInfoProps) {
+export default function PokemonInfo({ id, name, types, className }: PokemonInfoProps) {
   return (
-    <View style={style}>
-      <Text
-        style={{
-          fontSize: 12,
-          fontWeight: 700,
-          color: TextColors.number,
-        }}
-      >
+    <View className={className}>
+      <Text className="text-xs font-bold text-text-number">
         {id}
       </Text>
-      <Text
-        style={{
-          fontSize: 26,
-          fontWeight: 700,
-          color: TextColors.white,
-        }}
-      >
+      <Text className="text-[26px] font-bold text-white">
         {name}
       </Text>
-      <View
-        style={{
-          flexDirection: "row",
-          alignItems: "center",
-          alignSelf: "flex-start",
-          marginTop: 6,
-          gap: 6,
-        }}
-      >
+      <View className="flex-row items-center self-start mt-1.5 gap-1.5">
         {types.map((type, _) => (
           <Badge
             key={`${id}-${type.name}`}

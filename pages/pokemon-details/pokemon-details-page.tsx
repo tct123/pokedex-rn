@@ -1,9 +1,7 @@
-import { Badge } from "@/components/ui/badge";
 import PokemonInfo from "@/components/ui/pokemon-info";
-import { TextColors } from "@/constants/theme";
 import useFetchPokemonById from "@/features/fetch-pokemon-by-id/use-fetch-pokemon-by-id";
 import { useLocalSearchParams } from "expo-router";
-import { View, Text, Image } from "react-native";
+import { View } from "react-native";
 
 export default function PokemonDetailsPage() {
   const { id } = useLocalSearchParams();
@@ -11,25 +9,11 @@ export default function PokemonDetailsPage() {
   return (
     pokemon && (
       <View
-        style={{
-          backgroundColor: pokemon?.types[0].backgroundColor,
-          paddingTop: 96,
-          flex: 1,
-        }}
+        className="pt-24 flex-1"
+        style={{ backgroundColor: pokemon?.types[0].backgroundColor }}
       >
-        <PokemonInfo id={pokemon.id} name={pokemon.name} types={pokemon.types} style={{
-          alignSelf: "center",
-        }} />
-        <View
-          style={{
-            backgroundColor: TextColors.white,
-            flex: 1,
-            borderTopLeftRadius: 24,
-            borderTopRightRadius: 24,
-            marginTop: 48,
-            padding: 16,
-          }}
-        ></View>
+        <PokemonInfo id={pokemon.id} name={pokemon.name} types={pokemon.types} className="self-center" />
+        <View className="bg-white flex-1 rounded-t-3xl mt-12 p-4" />
       </View>
     )
   );
