@@ -1,4 +1,5 @@
 import { SearchBar } from "@/components/ui/search-bar";
+import { EmptyState } from "@/components/ui/empty-state";
 import { FloatingScrollButton } from "@/components/ui/floating-scroll-button";
 import { LightColors } from "@/constants/theme";
 import { Pokemon, PokemonCard } from "@/entities/pokemon";
@@ -14,7 +15,7 @@ import { PokemonListState } from "./components/pokemon-list-state";
 import { usePokemonListScroll } from "./hooks/use-pokemon-list-scroll";
 import { router } from "expo-router";
 
-type ListItem = { type: "search" } | { type: "pokemon"; data: Pokemon };
+type ListItem = { type: "search" } | { type: "pokemon"; data: Pokemon } | { type: "empty" };
 
 export default function PokemonListPage() {
   const { state: loadPokemonsState, actions: loadPokemonsActions } = useLoadPokemons();
@@ -52,15 +53,20 @@ export default function PokemonListPage() {
     ? searchState.pokemons
     : loadPokemonsState.pokemons;
   const showFooterLoading =
-    loadPokemonsState.isNextPageLoading && !searchState.isSearching;
+    (loadPokemonsState.isNextPageLoading && !searchState.isSearching) ||
+    searchState.isApiSearching;
 
-  const listData: ListItem[] = useMemo(
-    () => [
-      { type: "search" },
-      ...(displayPokemons?.map((p) => ({ type: "pokemon" as const, data: p })) ?? []),
-    ],
-    [displayPokemons],
-  );
+  const listData: ListItem[] = useMemo(() => {
+    const items: ListItem[] = [{ type: "search" }];
+
+    if (searchState.isSearching && displayPokemons?.length === 0 && !searchState.isApiSearching) {
+      items.push({ type: "empty" });
+    } else {
+      items.push(...(displayPokemons?.map((p) => ({ type: "pokemon" as const, data: p })) ?? []));
+    }
+
+    return items;
+  }, [displayPokemons, searchState.isSearching, searchState.isApiSearching]);
 
   const handleTap = useCallback((id: string) => {
     router.push({
@@ -71,7 +77,7 @@ export default function PokemonListPage() {
 
   const scrollToTop = useCallback(() => {
     refList.current?.scrollToOffset({ offset: 0, animated: true });
-  }, []);
+  }, [refList]);
 
   const renderItem = useCallback(
     ({ item }: { item: ListItem }) => {
@@ -83,6 +89,15 @@ export default function PokemonListPage() {
               placeholder="What Pokémon are you looking for?"
             />
           </Animated.View>
+        );
+      }
+      if (item.type === "empty") {
+        return (
+          <EmptyState
+            title="No Pokémon found"
+            message="Try searching with a different name or National Pokédex number"
+            image={require("@/assets/images/magikarp.png")}
+          />
         );
       }
       return (
@@ -108,9 +123,11 @@ export default function PokemonListPage() {
           className="flex-1 mb-4"
           data={listData}
           renderItem={renderItem}
-          keyExtractor={(item) =>
-            item.type === "search" ? "search-bar" : item.data.id
-          }
+          keyExtractor={(item) => {
+            if (item.type === "search") return "search-bar";
+            if (item.type === "empty") return "empty-state";
+            return item.data.id;
+          }}
           showsVerticalScrollIndicator={false}
           stickyHeaderIndices={[0]}
           onScroll={handleScroll}

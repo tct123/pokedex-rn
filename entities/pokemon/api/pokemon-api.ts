@@ -124,3 +124,35 @@ export async function fetchPokemons(limit: number, offset: number): Promise<Poke
     throw error;
   }
 }
+
+export async function searchPokemonByName(query: string): Promise<Pokemon | null> {
+  try {
+    const normalizedQuery = query.toLowerCase().trim();
+    if (!normalizedQuery) {
+      return null;
+    }
+
+    // Fetch basic pokemon data by name or ID
+    const response = await fetch(
+      `https://pokeapi.co/api/v2/pokemon/${normalizedQuery}`
+    );
+
+    // Pokemon not found - return null instead of throwing
+    if (response.status === 404) {
+      return null;
+    }
+
+    if (!response.ok) {
+      throw new Error("Network response was not ok");
+    }
+
+    const pokemonResponse: PokemonApiResponse = await response.json();
+
+    // Return only basic pokemon data - no species or evolution chain
+    // Full data will be fetched when the details page is opened
+    return mapPokemonResponse(pokemonResponse);
+  } catch (error) {
+    console.error("Error searching Pokémon:", error);
+    throw error;
+  }
+}

@@ -1,0 +1,37 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`EmptyState should match snapshot 1`] = `
+<View
+  className="py-12 px-6 items-center "
+>
+  <Image
+    className="w-40 h-40 mb-4"
+    resizeMode="contain"
+    source={
+      {
+        "testUri": "../../../assets/images/magikarp.png",
+      }
+    }
+  />
+  <Text
+    className="text-xl font-bold text-center mb-2"
+    style={
+      {
+        "color": "#17171B",
+      }
+    }
+  >
+    No Pokémon found
+  </Text>
+  <Text
+    className="text-sm text-center"
+    style={
+      {
+        "color": "#747476",
+      }
+    }
+  >
+    Try searching with a different name or National Pokédex number
+  </Text>
+</View>
+`;

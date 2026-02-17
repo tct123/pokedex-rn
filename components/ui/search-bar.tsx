@@ -1,14 +1,7 @@
 import { TextColors } from "@/constants/theme";
 import { Ionicons } from "@expo/vector-icons";
 import { useState } from "react";
-import {
-  Image,
-  Keyboard,
-  Platform,
-  Pressable,
-  TextInput,
-  View,
-} from "react-native";
+import { Image, Keyboard, Platform, Pressable, TextInput, View } from "react-native";
 
 interface SearchBarProps {
   onSearch: (text: string) => void;
@@ -33,8 +26,8 @@ export function SearchBar({
   };
   return (
     <View
-      className={`flex-row items-center bg-white rounded-[10px] px-3 h-12 shadow-sm ${className ?? ""}`}
-      style={Platform.OS === "android" ? { elevation: 2 } : undefined}
+      className={`flex-row items-center bg-white rounded-[10px] px-3 h-12 shadow-sm overflow-visible ${className ?? ""}`}
+      style={Platform.OS === "android" ? { elevation: 8 } : undefined}
     >
       <Image
         source={require("@/assets/images/search.png")}
@@ -46,6 +39,7 @@ export function SearchBar({
         placeholder={placeholder}
         placeholderTextColor={TextColors.grey}
         onChangeText={handleChange}
+        style={{ includeFontPadding: false }}
         value={search}
       />
       {search.length > 0 && (

@@ -2,7 +2,8 @@ import { Pokemon } from "@/entities/pokemon";
 import { EvolutionStage } from "@/entities/pokemon/model/pokemon";
 import { AppFonts } from "@/shared/ui/fonts";
 import { Image as ExpoImage } from "expo-image";
-import { View, Text, ScrollView } from "react-native";
+import { useRouter } from "expo-router";
+import { View, Text, ScrollView, TouchableOpacity } from "react-native";
 
 function EvolutionPair({
   from,
@@ -43,8 +44,18 @@ function EvolutionPair({
 }
 
 function PokemonStageView({ stage }: { stage: EvolutionStage }) {
+  const router = useRouter();
+
   return (
-    <View className="items-center w-[120px]">
+    <TouchableOpacity
+      className="items-center w-[120px]"
+      onPress={() =>
+        router.push({
+          pathname: "/pokemon/details",
+          params: { id: stage.id.toString() },
+        })
+      }
+    >
       <View className="w-20 h-20 rounded-full bg-grey-light items-center justify-center">
         <ExpoImage
           source={{ uri: stage.image }}
@@ -65,7 +76,7 @@ function PokemonStageView({ stage }: { stage: EvolutionStage }) {
       >
         {stage.name}
       </Text>
-    </View>
+    </TouchableOpacity>
   );
 }
 
@@ -93,14 +104,16 @@ export default function EvolutionPage({ pokemon }: { pokemon: Pokemon }) {
           No evolutions
         </Text>
       ) : (
-        chain.slice(0, -1).map((from, index) => (
-          <EvolutionPair
-            key={from.id}
-            from={from}
-            to={chain[index + 1]}
-            typeColor={typeColor}
-          />
-        ))
+        chain
+          .slice(0, -1)
+          .map((from, index) => (
+            <EvolutionPair
+              key={from.id}
+              from={from}
+              to={chain[index + 1]}
+              typeColor={typeColor}
+            />
+          ))
       )}
     </ScrollView>
   );

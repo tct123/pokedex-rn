@@ -3,4 +3,5 @@ export const pokemonKeys = {
   lists: () => [...pokemonKeys.all, 'list'] as const,
   details: () => [...pokemonKeys.all, 'detail'] as const,
   detail: (id: string) => [...pokemonKeys.details(), id] as const,
+  search: (query: string) => [...pokemonKeys.all, 'search', query] as const,
 };
