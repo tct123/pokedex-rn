@@ -4,24 +4,23 @@ import { useState } from "react";
 import { Image, Keyboard, Platform, Pressable, TextInput, View } from "react-native";
 
 interface SearchBarProps {
+  value?: string;
   onSearch: (text: string) => void;
   placeholder?: string;
   className?: string;
 }
 
 export function SearchBar({
+  value = "",
   onSearch,
   placeholder = "Search Pokémon",
   className,
 }: SearchBarProps) {
-  const [search, setSearch] = useState("");
   const handleClear = () => {
     Keyboard.dismiss();
-    setSearch("");
     onSearch("");
   };
   const handleChange = (text: string) => {
-    setSearch(text);
     onSearch(text);
   };
   return (
@@ -39,10 +38,19 @@ export function SearchBar({
         placeholder={placeholder}
         placeholderTextColor={TextColors.grey}
         onChangeText={handleChange}
-        style={{ includeFontPadding: false }}
-        value={search}
+        style={{
+          includeFontPadding: false,
+          paddingVertical: 0,
+          ...(Platform.OS === "ios" && {
+            paddingTop: 0,
+            paddingBottom: 0,
+            lineHeight: 20,
+            height: 20,
+          }),
+        }}
+        value={value}
       />
-      {search.length > 0 && (
+      {value.length > 0 && (
         <Pressable onPress={handleClear} className="p-2">
           <Ionicons name="close" size={20} color={TextColors.grey} />
         </Pressable>
