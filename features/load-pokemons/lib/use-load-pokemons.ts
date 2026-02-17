@@ -1,13 +1,14 @@
 import { Pokemon } from "@/entities/pokemon";
-import { fetchPokemons } from "@/entities/pokemon/api/pokemon-api";
+import { fetchPokemon, fetchPokemons } from "@/entities/pokemon/api/pokemon-api";
 import { pokemonKeys } from "@/shared/lib/query-keys";
-import { useInfiniteQuery } from "@tanstack/react-query";
+import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 import { useMemo } from "react";
 
 interface LoadPokemonsState {
   loading: boolean;
   isNextPageLoading: boolean;
   error: string | null;
+  isFirstPageError: boolean;
   pokemons: Pokemon[] | null;
   endOfItems: boolean;
 }
@@ -24,23 +25,38 @@ export interface LoadPokemonsResult {
 /**
  * Hook for loading Pokemon data with pagination using React Query.
  *
- * @param limit - Number of Pokemon to load per page (default: 10)
+ * @param limit - Number of Pokemon to load per page (default: 30)
  */
-export function useLoadPokemons(limit: number = 10) {
+export function useLoadPokemons(limit: number = 30) {
+  const queryClient = useQueryClient();
+
   const query = useInfiniteQuery({
     queryKey: pokemonKeys.lists(),
-    queryFn: ({ pageParam }) => fetchPokemons(limit, pageParam),
+    queryFn: async ({ pageParam }) => {
+      const ids = await fetchPokemons(limit, pageParam);
+      const pokemons = await Promise.all(
+        ids.map(async (id) => {
+          const pokemon = await fetchPokemon(id);
+          queryClient.setQueryData(pokemonKeys.detail(id), pokemon);
+          return pokemon;
+        })
+      );
+      return pokemons;
+    },
     initialPageParam: 0,
-    getNextPageParam: (lastPage, allPages, lastPageParam) => {
+    getNextPageParam: (lastPage, _allPages, lastPageParam) => {
       return lastPage.length < limit ? undefined : lastPageParam + limit;
     },
   });
+
+  const hasData = (query.data?.pages[0]?.length ?? 0) > 0;
 
   const state = useMemo(
     () => ({
       loading: query.isLoading,
       isNextPageLoading: query.isFetchingNextPage,
       error: query.error?.message ?? null,
+      isFirstPageError: !!query.error && !hasData,
       pokemons: query.data?.pages.flat() ?? null,
       endOfItems: !query.hasNextPage,
     }),
@@ -50,6 +66,7 @@ export function useLoadPokemons(limit: number = 10) {
       query.error,
       query.data,
       query.hasNextPage,
+      hasData,
     ]
   );
 

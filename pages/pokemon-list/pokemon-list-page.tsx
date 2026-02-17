@@ -1,6 +1,7 @@
 import { SearchBar } from "@/components/ui/search-bar";
 import { EmptyState } from "@/components/ui/empty-state";
 import { FloatingScrollButton } from "@/components/ui/floating-scroll-button";
+import { Toast } from "@/components/ui/toast";
 import { LightColors } from "@/constants/theme";
 import { Pokemon, PokemonCard } from "@/entities/pokemon";
 import { useLoadPokemons } from "@/features/load-pokemons";
@@ -55,6 +56,19 @@ export default function PokemonListPage() {
   const showFooterLoading =
     (loadPokemonsState.isNextPageLoading && !searchState.isSearching) ||
     searchState.isApiSearching;
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const dismissToast = useCallback(() => setToastMessage(null), []);
+  const prevNextPageErrorRef = useRef<string | null>(null);
+
+  const isNextPageError =
+    !loadPokemonsState.isFirstPageError && !!loadPokemonsState.error;
+
+  if (isNextPageError && loadPokemonsState.error !== prevNextPageErrorRef.current) {
+    prevNextPageErrorRef.current = loadPokemonsState.error;
+    setToastMessage("An error occurred, please try again later.");
+  } else if (!isNextPageError) {
+    prevNextPageErrorRef.current = null;
+  }
 
   const stickyPaddingStyle = useAnimatedStyle(() => ({
     paddingTop: withTiming(isSticky.value ? safeAreaInsets.top : 12, { duration: 200 }),
@@ -77,7 +91,7 @@ export default function PokemonListPage() {
       items.push({ id: "loading-state", type: "loading" });
       return items;
     }
-    if (loadPokemonsState.error && !searchState.isSearching) {
+    if (loadPokemonsState.isFirstPageError && !searchState.isSearching) {
       items.push({ id: "error-state", type: "error" });
       return items;
     }
@@ -101,7 +115,7 @@ export default function PokemonListPage() {
     displayPokemons,
     searchState.isSearching,
     searchState.isApiSearching,
-    loadPokemonsState.error,
+    loadPokemonsState.isFirstPageError,
     loadPokemonsState.loading,
   ]);
 
@@ -204,6 +218,7 @@ export default function PokemonListPage() {
         }
       />
       <FloatingScrollButton visible={showScrollButton} onPress={scrollToTop} />
+      <Toast message={toastMessage} onDismiss={dismissToast} />
     </View>
   );
 }

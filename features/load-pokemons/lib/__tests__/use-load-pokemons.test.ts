@@ -6,7 +6,9 @@ import { useLoadPokemons } from "../use-load-pokemons";
 // Mock the API module
 jest.mock("@/entities/pokemon/api/pokemon-api");
 
-const { fetchPokemons } = jest.requireMock("@/entities/pokemon/api/pokemon-api");
+const { fetchPokemons, fetchPokemon } = jest.requireMock(
+  "@/entities/pokemon/api/pokemon-api"
+);
 
 describe("useLoadPokemons with React Query", () => {
   const mockPokemon1: Pokemon = {
@@ -38,7 +40,11 @@ describe("useLoadPokemons with React Query", () => {
   });
 
   it("should load pokemons on initial render", async () => {
-    fetchPokemons.mockResolvedValueOnce([mockPokemon1, mockPokemon2]);
+    fetchPokemons.mockResolvedValueOnce(["001", "002"]);
+    fetchPokemon.mockImplementation((id: string) => {
+      if (id === "001") return Promise.resolve(mockPokemon1);
+      if (id === "002") return Promise.resolve(mockPokemon2);
+    });
 
     const { result } = renderHook(() => useLoadPokemons(10), {
       wrapper: createWrapper(),
@@ -60,7 +66,8 @@ describe("useLoadPokemons with React Query", () => {
   });
 
   it("should handle loading states correctly", async () => {
-    fetchPokemons.mockResolvedValueOnce([mockPokemon1]);
+    fetchPokemons.mockResolvedValueOnce(["001"]);
+    fetchPokemon.mockResolvedValue(mockPokemon1);
 
     const { result } = renderHook(() => useLoadPokemons(10), {
       wrapper: createWrapper(),
@@ -95,10 +102,16 @@ describe("useLoadPokemons with React Query", () => {
   });
 
   it("should fetch next page when fetchNextPage is called", async () => {
-    // First page
-    fetchPokemons.mockResolvedValueOnce([mockPokemon1, mockPokemon2]);
-    // Second page
-    fetchPokemons.mockResolvedValueOnce([mockPokemon3]);
+    // First page returns 2 IDs
+    fetchPokemons.mockResolvedValueOnce(["001", "002"]);
+    // Second page returns 1 ID
+    fetchPokemons.mockResolvedValueOnce(["003"]);
+
+    fetchPokemon.mockImplementation((id: string) => {
+      if (id === "001") return Promise.resolve(mockPokemon1);
+      if (id === "002") return Promise.resolve(mockPokemon2);
+      if (id === "003") return Promise.resolve(mockPokemon3);
+    });
 
     const { result } = renderHook(() => useLoadPokemons(2), {
       wrapper: createWrapper(),
@@ -130,8 +143,9 @@ describe("useLoadPokemons with React Query", () => {
   });
 
   it("should detect end of items when page has fewer items than limit", async () => {
-    // Return only 1 pokemon when limit is 10 (indicates end of list)
-    fetchPokemons.mockResolvedValueOnce([mockPokemon1]);
+    // Return only 1 ID when limit is 10 (indicates end of list)
+    fetchPokemons.mockResolvedValueOnce(["001"]);
+    fetchPokemon.mockResolvedValue(mockPokemon1);
 
     const { result } = renderHook(() => useLoadPokemons(10), {
       wrapper: createWrapper(),
@@ -146,15 +160,23 @@ describe("useLoadPokemons with React Query", () => {
   });
 
   it("should not detect end of items when page is full", async () => {
-    // Return full page (10 items when limit is 10)
-    const fullPage = Array.from({ length: 10 }, (_, i) => ({
-      id: `00${i + 1}`,
-      name: `Pokemon${i + 1}`,
+    // Return full page (10 IDs when limit is 10)
+    const ids = Array.from({ length: 10 }, (_, i) =>
+      String(i + 1).padStart(3, "0")
+    );
+    fetchPokemons.mockResolvedValueOnce(ids);
+
+    const pokemons = ids.map((id) => ({
+      id,
+      name: `Pokemon${id}`,
       types: [],
-      image: `https://example.com/pokemon${i + 1}.png`,
+      image: `https://example.com/pokemon${id}.png`,
       stats: [],
     }));
-    fetchPokemons.mockResolvedValueOnce(fullPage);
+    fetchPokemon.mockImplementation((id: string) => {
+      const pokemon = pokemons.find((p) => p.id === id);
+      return Promise.resolve(pokemon);
+    });
 
     const { result } = renderHook(() => useLoadPokemons(10), {
       wrapper: createWrapper(),

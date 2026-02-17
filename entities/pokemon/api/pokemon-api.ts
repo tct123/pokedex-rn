@@ -3,7 +3,6 @@ import {
   ChainLink,
   EvolutionChainApiResponse,
   PokemonApiResponse,
-  PokemonPreviewApiResponse,
   PokemonSpeciesApiResponse,
   PokemonsApiResponse,
 } from "./pokemon-api-response";
@@ -26,7 +25,7 @@ async function fetchEvolutionChain(url: string): Promise<EvolutionChainApiRespon
   return response.json();
 }
 
-function extractIdFromUrl(url: string): string {
+export function extractIdFromUrl(url: string): string {
   const segments = url.replace(/\/$/, "").split("/");
   return segments[segments.length - 1];
 }
@@ -101,28 +100,15 @@ export async function fetchPokemon(id: string): Promise<Pokemon> {
   }
 }
 
-export async function fetchPokemons(limit: number, offset: number): Promise<Pokemon[]> {
-  try {
-    const response = await fetch(
-      `https://pokeapi.co/api/v2/pokemon?limit=${limit}&offset=${offset}`
-    );
-    if (!response.ok) {
-      throw new Error("Network response was not ok");
-    }
-    const apiResponse: PokemonsApiResponse = await response.json();
-    const pokemonListPromises: Promise<PokemonApiResponse>[] = apiResponse.results.map(
-      async (pokemon: PokemonPreviewApiResponse) => {
-        const pokemonDetail = await fetch(pokemon.url);
-        const pokemonResponseModel = await pokemonDetail.json();
-        return pokemonResponseModel;
-      }
-    );
-    const pokemonModels = await Promise.all(pokemonListPromises);
-    return pokemonModels.map(mapPokemonResponse);
-  } catch (error) {
-    console.error("Error fetching Pokémon data:", error);
-    throw error;
+export async function fetchPokemons(limit: number, offset: number): Promise<string[]> {
+  const response = await fetch(
+    `https://pokeapi.co/api/v2/pokemon?limit=${limit}&offset=${offset}`
+  );
+  if (!response.ok) {
+    throw new Error("Network response was not ok");
   }
+  const apiResponse: PokemonsApiResponse = await response.json();
+  return apiResponse.results.map((p) => extractIdFromUrl(p.url).padStart(3, "0"));
 }
 
 export async function searchPokemonByName(query: string): Promise<Pokemon | null> {
