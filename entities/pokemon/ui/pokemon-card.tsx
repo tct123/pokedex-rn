@@ -1,9 +1,10 @@
 import { Badge } from "@/components/ui/badge";
 import { TextColors } from "@/constants/theme";
 import { Image as ExpoImage } from "expo-image";
-import React, { useRef } from "react";
-import { Animated, Image, Pressable, Text, View } from "react-native";
+import React from "react";
+import { Image, Pressable, Text, View } from "react-native";
 import { Pokemon } from "../model/pokemon";
+import Animated, { useAnimatedStyle, useSharedValue, withSpring } from "react-native-reanimated";
 
 interface PokemonCardProps {
   pokemon: Pokemon;
@@ -16,20 +17,16 @@ export const PokemonCard = React.memo(function PokemonCard({
   onTap,
   className,
 }: PokemonCardProps) {
-  const scaleAnim = useRef(new Animated.Value(1)).current;
+  const scaleAnim = useSharedValue(1);
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scaleAnim.value }],
+  }));
 
   const handlePressIn = () => {
-    Animated.spring(scaleAnim, {
-      toValue: 0.97,
-      useNativeDriver: true,
-    }).start();
+    scaleAnim.value = withSpring(0.95);
   };
-
   const handlePressOut = () => {
-    Animated.spring(scaleAnim, {
-      toValue: 1,
-      useNativeDriver: true,
-    }).start();
+    scaleAnim.value = withSpring(1);
   };
 
   return (
@@ -39,7 +36,7 @@ export const PokemonCard = React.memo(function PokemonCard({
       onPressIn={handlePressIn}
       onPressOut={handlePressOut}
     >
-      <Animated.View style={{ transform: [{ scale: scaleAnim }] }}>
+      <Animated.View style={animatedStyle}>
         <View
           className="rounded-[10px] flex-row justify-between mt-6"
           style={{ backgroundColor: pokemon.types[0].backgroundColor }}

@@ -5,7 +5,7 @@ import { LightColors } from "@/constants/theme";
 import { Pokemon, PokemonCard } from "@/entities/pokemon";
 import { useLoadPokemons } from "@/features/load-pokemons";
 import { useFilterPokemonList } from "@/features/filter-pokemon-list";
-import { FlashList, FlashListRef } from "@shopify/flash-list";
+import { FlashList } from "@shopify/flash-list";
 import { useCallback, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
@@ -171,8 +171,8 @@ export default function PokemonListPage() {
   return (
     <View className="flex-1">
       <FlashList
+        className="flex-1"
         ref={refList}
-        className="flex-1 mb-4"
         data={listData}
         renderItem={renderItem}
         keyExtractor={(item) => item.id}

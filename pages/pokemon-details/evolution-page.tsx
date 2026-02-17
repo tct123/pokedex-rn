@@ -3,7 +3,8 @@ import { EvolutionStage } from "@/entities/pokemon/model/pokemon";
 import { AppFonts } from "@/shared/ui/fonts";
 import { Image as ExpoImage } from "expo-image";
 import { useRouter } from "expo-router";
-import { View, Text, ScrollView, TouchableOpacity } from "react-native";
+import { View, Text, ScrollView, Pressable } from "react-native";
+import Animated, { useAnimatedStyle, useSharedValue, withSpring } from "react-native-reanimated";
 
 function EvolutionPair({
   from,
@@ -45,10 +46,23 @@ function EvolutionPair({
 
 function PokemonStageView({ stage }: { stage: EvolutionStage }) {
   const router = useRouter();
+  const scale = useSharedValue(1);
+  const style = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }],
+  }));
+
+  const handlePressIn = () => {
+    scale.value = withSpring(0.85);
+  };
+  const handlePressOut = () => {
+    scale.value = withSpring(1);
+  };
 
   return (
-    <TouchableOpacity
+    <Pressable
       className="items-center w-[120px]"
+      onPressIn={handlePressIn}
+      onPressOut={handlePressOut}
       onPress={() =>
         router.push({
           pathname: "/pokemon/details",
@@ -56,27 +70,29 @@ function PokemonStageView({ stage }: { stage: EvolutionStage }) {
         })
       }
     >
-      <View className="w-20 h-20 rounded-full bg-grey-light items-center justify-center">
-        <ExpoImage
-          source={{ uri: stage.image }}
-          style={{ width: 64, height: 64 }}
-          contentFit="contain"
-          cachePolicy="memory-disk"
-        />
-      </View>
-      <Text
-        className="text-xs text-text-grey mt-2"
-        style={{ fontFamily: AppFonts.regular }}
-      >
-        #{stage.id}
-      </Text>
-      <Text
-        className="text-sm text-text-black mt-0.5"
-        style={{ fontFamily: AppFonts.bold }}
-      >
-        {stage.name}
-      </Text>
-    </TouchableOpacity>
+      <Animated.View style={style}>
+        <View className="w-20 h-20 rounded-full bg-grey-light items-center justify-center">
+          <ExpoImage
+            source={{ uri: stage.image }}
+            style={{ width: 64, height: 64 }}
+            contentFit="contain"
+            cachePolicy="memory-disk"
+          />
+        </View>
+        <Text
+          className="text-xs text-text-grey mt-2"
+          style={{ fontFamily: AppFonts.regular }}
+        >
+          #{stage.id}
+        </Text>
+        <Text
+          className="text-sm text-text-black mt-0.5"
+          style={{ fontFamily: AppFonts.bold }}
+        >
+          {stage.name}
+        </Text>
+      </Animated.View>
+    </Pressable>
   );
 }
 
