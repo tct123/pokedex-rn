@@ -11,12 +11,15 @@ workflows:
       groups:
         - PROD
     scripts:
-      - name: Decode keystore
-        script: |
-          echo "$CM_KEYSTORE" | base64 --decode > android/app/release.keystore
       - name: Install dependencies
         script: |
           npm install
+      - name: Generate native project
+        script: |
+          npx expo prebuild --platform android
+      - name: Decode keystore
+        script: |
+          echo "$CM_KEYSTORE" | base64 --decode > android/app/release.keystore
       - name: Build Android APK
         script: |
           cd android && ./gradlew assembleRelease
