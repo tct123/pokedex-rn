@@ -1,13 +1,22 @@
 import { QueryClient } from '@tanstack/react-query';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { createAsyncStoragePersister } from '@tanstack/query-async-storage-persister';
+
+export const persister = createAsyncStoragePersister({
+  storage: AsyncStorage,
+  key: 'POKEDEX_CACHE',
+  throttleTime: 1000,
+});
 
 export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 5 * 60 * 1000, // 5 minutes - Pokemon data is static
-      gcTime: 10 * 60 * 1000, // 10 minutes garbage collection
+      staleTime: Infinity, // Data never goes stale - treat as permanent database
+      gcTime: Infinity, // Data never gets garbage collected - persist forever
       retry: 2, // Retry failed requests twice
-      refetchOnWindowFocus: false, // Mobile app context
-      refetchOnReconnect: true, // Network resilience
+      refetchOnWindowFocus: false, // Don't refetch when app comes to foreground
+      refetchOnReconnect: false, // Don't refetch on reconnect (trust local data)
+      refetchOnMount: false, // Don't refetch on component mount (use cached data)
     },
   },
 });
