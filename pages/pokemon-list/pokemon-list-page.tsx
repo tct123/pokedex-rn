@@ -5,7 +5,7 @@ import { LightColors } from "@/constants/theme";
 import { Pokemon, PokemonCard } from "@/entities/pokemon";
 import { useLoadPokemons } from "@/features/load-pokemons";
 import { useFilterPokemonList } from "@/features/filter-pokemon-list";
-import { FlashList } from "@shopify/flash-list";
+import { FlashList, FlashListRef } from "@shopify/flash-list";
 import { useCallback, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
@@ -40,8 +40,8 @@ export default function PokemonListPage() {
   const { state: searchState, actions: searchActions } = useFilterPokemonList(
     loadPokemonsState.pokemons,
   );
-  const { refList, setOffsetY } = usePokemonListScroll(
-    loadPokemonsState.pokemons,
+  const { refList, setOffsetY } = usePokemonListScroll<ListItem>(
+    loadPokemonsState.pokemons !== null && loadPokemonsState.pokemons.length > 0,
     searchState.isSearching,
   );
   const safeAreaInsets = useSafeAreaInsets();
