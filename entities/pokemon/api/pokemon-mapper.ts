@@ -23,6 +23,27 @@ import {
 } from "../model/pokemon-type";
 import { PokemonApiResponse } from "./pokemon-api-response";
 
+const TYPE_MAP: Record<string, PokemonType> = {
+  bug: new BugType(),
+  dark: new DarkType(),
+  dragon: new DragonType(),
+  electric: new ElectricType(),
+  fairy: new FairyType(),
+  fighting: new FightingType(),
+  fire: new FireType(),
+  flying: new FlyingType(),
+  ghost: new GhostType(),
+  grass: new GrassType(),
+  ground: new GroundType(),
+  ice: new IceType(),
+  normal: new NormalType(),
+  poison: new PoisonType(),
+  psychic: new PsychicType(),
+  rock: new RockType(),
+  steel: new SteelType(),
+  water: new WaterType(),
+};
+
 export function mapPokemonResponse(pokemonApiResponse: PokemonApiResponse): Pokemon {
   return {
     id: String(pokemonApiResponse.id).padStart(3, "0"),
@@ -40,44 +61,5 @@ export function mapPokemonResponse(pokemonApiResponse: PokemonApiResponse): Poke
 }
 
 const mapResponseTypeToPokemonType = (type: string): PokemonType => {
-  switch (String(type).toLowerCase()) {
-    default:
-      return new NormalType();
-    case "bug":
-      return new BugType();
-    case "dark":
-      return new DarkType();
-    case "dragon":
-      return new DragonType();
-    case "electric":
-      return new ElectricType();
-    case "fairy":
-      return new FairyType();
-    case "fighting":
-      return new FightingType();
-    case "fire":
-      return new FireType();
-    case "flying":
-      return new FlyingType();
-    case "ghost":
-      return new GhostType();
-    case "grass":
-      return new GrassType();
-    case "ground":
-      return new GroundType();
-    case "ice":
-      return new IceType();
-    case "normal":
-      return new NormalType();
-    case "poison":
-      return new PoisonType();
-    case "psychic":
-      return new PsychicType();
-    case "rock":
-      return new RockType();
-    case "steel":
-      return new SteelType();
-    case "water":
-      return new WaterType();
-  }
+  return TYPE_MAP[String(type).toLowerCase()] ?? TYPE_MAP.normal;
 };

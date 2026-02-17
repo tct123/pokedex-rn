@@ -5,6 +5,8 @@ import * as SplashScreen from "expo-splash-screen";
 import { useEffect } from "react";
 import { StatusBar } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
+import { QueryClientProvider } from "@tanstack/react-query";
+import { queryClient } from "@/shared/lib/query-client";
 
 // Keep the splash screen visible while we fetch resources
 SplashScreen.preventAutoHideAsync();
@@ -33,20 +35,22 @@ export default function RootLayout() {
   }
 
   return (
-    <SafeAreaProvider>
-      <StatusBar barStyle="dark-content" translucent backgroundColor="transparent" />
-      <Stack
-        screenOptions={{
-          headerShown: true,
-          headerShadowVisible: false,
-          headerTitle: "",
-          headerTransparent: true,
-          headerTintColor: "#FFFFFF",
-        }}
-      >
-        <Stack.Screen name="index" options={{ headerShown: false }} />
-        <Stack.Screen name="(pokemon)" />
-      </Stack>
-    </SafeAreaProvider>
+    <QueryClientProvider client={queryClient}>
+      <SafeAreaProvider>
+        <StatusBar barStyle="dark-content" translucent backgroundColor="transparent" />
+        <Stack
+          screenOptions={{
+            headerShown: true,
+            headerShadowVisible: false,
+            headerTitle: "",
+            headerTransparent: true,
+            headerTintColor: "#FFFFFF",
+          }}
+        >
+          <Stack.Screen name="index" options={{ headerShown: false }} />
+          <Stack.Screen name="(pokemon)" />
+        </Stack>
+      </SafeAreaProvider>
+    </QueryClientProvider>
   );
 }

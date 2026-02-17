@@ -1,2 +1,2 @@
-export { ILoadPokemonsRepository } from "./load-pokemons-repository.interface";
-export { loadPokemonsRepository } from "./load-pokemons-repository";
+// Repository pattern removed - using React Query for data fetching
+// API functions are located in entities/pokemon/api/pokemon-api.ts

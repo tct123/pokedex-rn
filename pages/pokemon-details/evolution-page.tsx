@@ -1,7 +1,8 @@
 import { Pokemon } from "@/entities/pokemon";
 import { EvolutionStage } from "@/entities/pokemon/model/pokemon";
 import { AppFonts } from "@/shared/ui/fonts";
-import { View, Text, Image, ScrollView } from "react-native";
+import { Image as ExpoImage } from "expo-image";
+import { View, Text, ScrollView } from "react-native";
 
 function EvolutionPair({
   from,
@@ -45,10 +46,11 @@ function PokemonStageView({ stage }: { stage: EvolutionStage }) {
   return (
     <View className="items-center w-[120px]">
       <View className="w-20 h-20 rounded-full bg-grey-light items-center justify-center">
-        <Image
+        <ExpoImage
           source={{ uri: stage.image }}
-          className="w-16 h-16"
-          resizeMode="contain"
+          style={{ width: 64, height: 64 }}
+          contentFit="contain"
+          cachePolicy="memory-disk"
         />
       </View>
       <Text

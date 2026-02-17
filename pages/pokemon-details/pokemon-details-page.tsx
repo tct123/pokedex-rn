@@ -5,7 +5,8 @@ import useFetchPokemonById from "@/features/fetch-pokemon-by-id/use-fetch-pokemo
 import { AppFonts } from "@/shared/ui/fonts";
 import { useLocalSearchParams } from "expo-router";
 import { useCallback, useState } from "react";
-import { ActivityIndicator, Image, ImageBackground, useWindowDimensions, View } from "react-native";
+import { Image as ExpoImage } from "expo-image";
+import { ActivityIndicator, ImageBackground, useWindowDimensions, View } from "react-native";
 import { TabBar, TabBarItem, TabView } from "react-native-tab-view";
 import AboutPage from "./about-page";
 import StatsPage from "./stats-page";
@@ -124,7 +125,7 @@ export default function PokemonDetailsPage() {
                 source={require("@/assets/images/circle.png")}
                 className="mr-6"
               >
-                <Image source={{ uri: pokemon.image }} width={125} height={125} />
+                <ExpoImage source={{ uri: pokemon.image }} style={{ width: 125, height: 125 }} cachePolicy="memory-disk" />
               </ImageBackground>
               <PokemonInfo
                 id={`#${pokemon.id}`}

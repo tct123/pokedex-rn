@@ -1,6 +1,7 @@
 import { Pokemon } from "@/entities/pokemon";
-import { ILoadPokemonsRepository, loadPokemonsRepository } from "@/shared/api";
-import { useEffect, useState } from "react";
+import { fetchPokemon } from "@/entities/pokemon/api/pokemon-api";
+import { pokemonKeys } from "@/shared/lib/query-keys";
+import { useQuery } from "@tanstack/react-query";
 
 export interface FetchPokemonState {
   pokemon: Pokemon | null;
@@ -8,43 +9,16 @@ export interface FetchPokemonState {
   error: string | null;
 }
 
-export default function useFetchPokemonById(
-  id: string,
-  repository: ILoadPokemonsRepository = loadPokemonsRepository
-) {
-  const [state, setState] = useState<FetchPokemonState>({
-    pokemon: null,
-    loading: false,
-    error: null,
+export default function useFetchPokemonById(id: string) {
+  const query = useQuery({
+    queryKey: pokemonKeys.detail(id),
+    queryFn: () => fetchPokemon(id),
+    enabled: !!id,
   });
 
-  useEffect(() => {
-    setState({ pokemon: null, loading: true, error: null });
-    repository
-      .fetchPokemonById(id)
-      .then((pokemon) =>
-        setState((state) => ({
-          ...state,
-          pokemon: pokemon,
-        }))
-      )
-      .catch((error) =>
-        setState((state) => ({
-          ...state,
-          error: error.message,
-        }))
-      )
-      .finally(() =>
-        setState((state) => ({
-          ...state,
-          loading: false,
-        }))
-      );
-  }, [id, repository]);
-  
   return {
-    pokemon: state.pokemon,
-    loading: state.loading,
-    error: state.error,
+    pokemon: query.data ?? null,
+    loading: query.isLoading,
+    error: query.error?.message ?? null,
   };
 }

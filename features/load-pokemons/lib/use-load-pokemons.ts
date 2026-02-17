@@ -1,7 +1,8 @@
 import { Pokemon } from "@/entities/pokemon";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { loadPokemonsRepository } from "../../../shared/api/load-pokemons-repository";
-import { ILoadPokemonsRepository } from "../../../shared/api/load-pokemons-repository.interface";
+import { fetchPokemons } from "@/entities/pokemon/api/pokemon-api";
+import { pokemonKeys } from "@/shared/lib/query-keys";
+import { useInfiniteQuery } from "@tanstack/react-query";
+import { useMemo } from "react";
 
 interface LoadPokemonsState {
   loading: boolean;
@@ -21,86 +22,48 @@ export interface LoadPokemonsResult {
 }
 
 /**
- * Hook for loading and filtering Pokemon data.
- * Supports dependency injection for testing.
+ * Hook for loading Pokemon data with pagination using React Query.
  *
- * @param limit - Number of Pokemon to load
- * @param offset - Pagination offset
- * @param repository - Repository instance (injectable for testing)
+ * @param limit - Number of Pokemon to load per page (default: 10)
  */
-export function useLoadPokemons(
-  limit: number = 10,
-  offset: number = 0,
-  repository: ILoadPokemonsRepository = loadPokemonsRepository
-) {
-  const [state, setState] = useState<LoadPokemonsState>({
-    loading: false,
-    isNextPageLoading: false,
-    error: null,
-    pokemons: null,
-    endOfItems: false,
+export function useLoadPokemons(limit: number = 10) {
+  const query = useInfiniteQuery({
+    queryKey: pokemonKeys.lists(),
+    queryFn: ({ pageParam }) => fetchPokemons(limit, pageParam),
+    initialPageParam: 0,
+    getNextPageParam: (lastPage, allPages, lastPageParam) => {
+      return lastPage.length < limit ? undefined : lastPageParam + limit;
+    },
   });
-  const currentOffset = useRef(offset);
 
-  const fetchNextPage = useCallback(() => {
-    setState((prev) => {
-      if (prev.isNextPageLoading) return prev;
-      currentOffset.current = currentOffset.current + limit;
-      repository
-        .loadPokemons(limit, currentOffset.current)
-        .then((pokemons) =>
-          setState((state) => ({
-            ...state,
-            pokemons: [...(state.pokemons ?? []), ...pokemons],
-            endOfItems: pokemons.length < limit,
-            isNextPageLoading: false,
-          }))
-        )
-        .catch((error) =>
-          setState((state) => ({
-            ...state,
-            error: error.message,
-            isNextPageLoading: false,
-          }))
-        );
-      return { ...prev, isNextPageLoading: true };
-    });
-  }, [limit, repository]);
-
-  const actions = useMemo(() => ({ fetchNextPage }), [fetchNextPage]);
-
-  useEffect(() => {
-    setState((prev) => ({ ...prev, loading: true }));
-    repository
-      .loadPokemons(limit, offset)
-      .then((data) => {
-        currentOffset.current = offset;
-        setState((prev) => ({ ...prev, pokemons: data, error: null, loading: false }));
-      })
-      .catch((error) => {
-        setState((prev) => ({ ...prev, error: error.message, loading: false }));
-      });
-  }, [limit, offset, repository]);
-
-  const memoizedState = useMemo(
+  const state = useMemo(
     () => ({
-      loading: state.loading,
-      error: state.error,
-      isNextPageLoading: state.isNextPageLoading,
-      pokemons: state.pokemons,
-      endOfItems: state.endOfItems,
+      loading: query.isLoading,
+      isNextPageLoading: query.isFetchingNextPage,
+      error: query.error?.message ?? null,
+      pokemons: query.data?.pages.flat() ?? null,
+      endOfItems: !query.hasNextPage,
     }),
     [
-      state.loading,
-      state.error,
-      state.isNextPageLoading,
-      state.pokemons,
-      state.endOfItems,
+      query.isLoading,
+      query.isFetchingNextPage,
+      query.error,
+      query.data,
+      query.hasNextPage,
     ]
   );
 
+  const actions = useMemo(
+    () => ({
+      fetchNextPage: () => {
+        query.fetchNextPage();
+      },
+    }),
+    [query]
+  );
+
   return {
-    state: memoizedState,
+    state,
     actions,
   } as LoadPokemonsResult;
 }

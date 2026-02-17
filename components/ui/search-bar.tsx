@@ -4,6 +4,7 @@ import { useState } from "react";
 import {
   Image,
   Keyboard,
+  Platform,
   Pressable,
   TextInput,
   View,
@@ -31,7 +32,10 @@ export function SearchBar({
     onSearch(text);
   };
   return (
-    <View className={`flex-row items-center bg-white rounded-[10px] px-3 h-12 shadow-sm ${className ?? ""}`}>
+    <View
+      className={`flex-row items-center bg-white rounded-[10px] px-3 h-12 shadow-sm ${className ?? ""}`}
+      style={Platform.OS === "android" ? { elevation: 2 } : undefined}
+    >
       <Image
         source={require("@/assets/images/search.png")}
         className="w-5 h-5"

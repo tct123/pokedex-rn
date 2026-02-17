@@ -3,8 +3,9 @@ import { LightColors } from "@/constants/theme";
 import { Pokemon, PokemonCard } from "@/entities/pokemon";
 import { useLoadPokemons } from "@/features/load-pokemons";
 import { useFilterPokemonList } from "@/features/filter-pokemon-list";
-import { useCallback, useRef } from "react";
-import { ActivityIndicator, FlatList, NativeScrollEvent, NativeSyntheticEvent, View } from "react-native";
+import { FlashList } from "@shopify/flash-list";
+import { useCallback, useMemo, useRef } from "react";
+import { ActivityIndicator, NativeScrollEvent, NativeSyntheticEvent, View } from "react-native";
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { PokemonListHeader } from "./components/pokemon-list-header";
@@ -46,10 +47,43 @@ export default function PokemonListPage() {
   const showFooterLoading =
     loadPokemonsState.isNextPageLoading && !searchState.isSearching;
 
-  const listData: ListItem[] = [
-    { type: "search" },
-    ...(displayPokemons?.map((p) => ({ type: "pokemon" as const, data: p })) ?? []),
-  ];
+  const listData: ListItem[] = useMemo(
+    () => [
+      { type: "search" },
+      ...(displayPokemons?.map((p) => ({ type: "pokemon" as const, data: p })) ?? []),
+    ],
+    [displayPokemons],
+  );
+
+  const handleTap = useCallback((id: string) => {
+    router.push({
+      pathname: "/pokemon/details",
+      params: { id },
+    });
+  }, []);
+
+  const renderItem = useCallback(
+    ({ item }: { item: ListItem }) => {
+      if (item.type === "search") {
+        return (
+          <Animated.View className="bg-white px-4 pb-4 pt-3 overflow-visible" style={stickyPaddingStyle}>
+            <SearchBar
+              onSearch={searchActions.onSearch}
+              placeholder="What Pokémon are you looking for?"
+            />
+          </Animated.View>
+        );
+      }
+      return (
+        <PokemonCard
+          onTap={handleTap}
+          pokemon={item.data}
+          className="my-1 mx-4"
+        />
+      );
+    },
+    [stickyPaddingStyle, searchActions.onSearch, handleTap],
+  );
 
   return (
     <View className="flex-1">
@@ -58,40 +92,18 @@ export default function PokemonListPage() {
         error={loadPokemonsState.error}
       />
       {displayPokemons && (
-        <FlatList
+        <FlashList
           ref={refList}
           className="flex-1 mb-4"
           data={listData}
-          renderItem={({ item }) => {
-            if (item.type === "search") {
-              return (
-                <Animated.View className="bg-white px-4 py-3" style={stickyPaddingStyle}>
-                  <SearchBar
-                    onSearch={searchActions.onSearch}
-                    placeholder="What Pokémon are you looking for?"
-                  />
-                </Animated.View>
-              );
-            }
-            return (
-              <PokemonCard
-                onTap={(id) =>
-                  router.push({
-                    pathname: "/pokemon/details",
-                    params: { id },
-                  })
-                }
-                pokemon={item.data}
-                className="my-1 mx-4"
-              />
-            );
-          }}
+          renderItem={renderItem}
           keyExtractor={(item) =>
             item.type === "search" ? "search-bar" : item.data.id
           }
           showsVerticalScrollIndicator={false}
-          stickyHeaderIndices={[1]}
+          stickyHeaderIndices={[0]}
           onScroll={handleScroll}
+          removeClippedSubviews={true}
           ListHeaderComponent={
             <View onLayout={(e) => { headerHeight.current = e.nativeEvent.layout.height; }}>
               <PokemonListHeader />

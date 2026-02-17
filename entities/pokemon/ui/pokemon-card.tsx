@@ -1,5 +1,7 @@
 import { Badge } from "@/components/ui/badge";
 import { TextColors } from "@/constants/theme";
+import { Image as ExpoImage } from "expo-image";
+import React from "react";
 import {
   Image,
   Pressable,
@@ -7,7 +9,6 @@ import {
   View,
 } from "react-native";
 import { Pokemon } from "../model/pokemon";
-import { AppFonts } from "@/shared/ui/fonts";
 
 interface PokemonCardProps {
   pokemon: Pokemon;
@@ -15,7 +16,7 @@ interface PokemonCardProps {
   className?: string;
 }
 
-export function PokemonCard({ pokemon, onTap, className }: PokemonCardProps) {
+export const PokemonCard = React.memo(function PokemonCard({ pokemon, onTap, className }: PokemonCardProps) {
   return (
     <View className={`relative ${className ?? ""}`}>
       <Pressable
@@ -56,11 +57,13 @@ export function PokemonCard({ pokemon, onTap, className }: PokemonCardProps) {
           source={require("@/assets/images/card_pattern.png")}
           className="absolute left-[90px] top-[30px]"
         />
-        <Image
+        <ExpoImage
           source={{ uri: pokemon.image }}
-          className="w-[130px] h-[130px] absolute right-[10px]"
+          style={{ width: 130, height: 130, position: "absolute", right: 10 }}
+          cachePolicy="memory-disk"
+          recyclingKey={pokemon.id}
         />
       </Pressable>
     </View>
   );
-}
+});

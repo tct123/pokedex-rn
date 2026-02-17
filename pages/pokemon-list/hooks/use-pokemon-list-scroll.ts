@@ -1,10 +1,10 @@
 import { Pokemon } from "@/entities/pokemon";
-import { useEffect, useRef } from "react";
-import { FlatList } from "react-native";
+import { FlashList } from "@shopify/flash-list";
+import { ElementRef, useEffect, useRef } from "react";
 
 export function usePokemonListScroll(pokemons: Pokemon[] | null, isSearching: boolean) {
   const refOffset = useRef(0);
-  const refList = useRef<FlatList | null>(null);
+  const refList = useRef<ElementRef<typeof FlashList<any>> | null>(null);
   const refPreviousIsSearching = useRef(isSearching);
   const refPreviousLength = useRef(pokemons?.length ?? 0);
 

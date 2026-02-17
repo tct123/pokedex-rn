@@ -23,7 +23,8 @@ This is a React Native Pokédex app built with **Expo 54**, **Expo Router**, and
 - **`features/`** — Isolated business features as custom hooks: `load-pokemons` (pagination), `filter-pokemon-list` (debounced search), `fetch-pokemon-by-id`.
 - **`entities/`** — Business entities. `pokemon` has `model/` (interfaces), `api/` (fetching + mappers), and `ui/` (PokemonCard).
 - **`components/ui/`** — Shared presentational components (Badge, SearchBar, IconButton, PokemonInfo).
-- **`shared/api/`** — Repository pattern for data access with caching. `ILoadPokemonsRepository` interface with `LoadPokemonsRepositoryImpl` singleton.
+- **`shared/api/`** — API layer (currently legacy, to be removed).
+- **`shared/lib/`** — Shared utilities: `query-client.ts` (React Query config), `query-keys.ts` (query key factory).
 - **`constants/`** — Theme (Material Design 3 colors, fonts).
 
 Each FSD slice exports via `index.ts` public API. Layers only import from layers below them.
@@ -31,10 +32,20 @@ Each FSD slice exports via `index.ts` public API. Layers only import from layers
 ### Key patterns
 
 - **Custom hooks** return `{ state, actions }` tuples with memoized values to prevent re-renders.
-- **Repository pattern** with interface + implementation for dependency injection and testability.
+- **React Query** for server state management with automatic caching, background refetching, and optimistic updates.
+  - Query keys follow a hierarchical structure: `pokemonKeys.lists()`, `pokemonKeys.detail(id)`
+  - Cache configuration: 5 min stale time (Pokemon data is static), 10 min garbage collection
+  - Queries use `useQuery` for single items, `useInfiniteQuery` for paginated lists
 - **Path alias**: `@/*` maps to project root (configured in `tsconfig.json`).
 - **Pokemon types** are classes implementing `PokemonType` interface, each with name, icon, and color theming.
 
 ### Testing
 
-Uses `jest-expo` preset with `@testing-library/react-native`. Tests are colocated in `__tests__/` directories alongside source. Hook tests use `renderHook()` + `waitFor()` with injected mock repositories.
+Uses `jest-expo` preset with `@testing-library/react-native`. Tests are colocated in `__tests__/` directories alongside source.
+
+**Testing with React Query:**
+- Mock API functions at module level using `jest.mock('@/entities/pokemon/api/pokemon-api')`
+- Wrap hooks with `createWrapper()` from `@/shared/test-utils/react-query-wrapper`
+- Use `renderHook()` with `{ wrapper: createWrapper() }` for proper QueryClient context
+- Use `waitFor()` from testing-library to await async state updates
+- Each test gets a fresh QueryClient with `retry: false` and `gcTime: 0` for faster tests
