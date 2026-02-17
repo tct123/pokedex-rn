@@ -9,7 +9,7 @@ workflows:
       java: 17
       node: 20
       groups:
-        - prod
+        - PROD
     scripts:
       - name: Decode keystore
         script: |
