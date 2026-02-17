@@ -1,10 +1,11 @@
 import { SearchBar } from "@/components/ui/search-bar";
+import { FloatingScrollButton } from "@/components/ui/floating-scroll-button";
 import { LightColors } from "@/constants/theme";
 import { Pokemon, PokemonCard } from "@/entities/pokemon";
 import { useLoadPokemons } from "@/features/load-pokemons";
 import { useFilterPokemonList } from "@/features/filter-pokemon-list";
 import { FlashList } from "@shopify/flash-list";
-import { useCallback, useMemo, useRef } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import { ActivityIndicator, NativeScrollEvent, NativeSyntheticEvent, View } from "react-native";
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -27,6 +28,7 @@ export default function PokemonListPage() {
   const safeAreaInsets = useSafeAreaInsets();
   const headerHeight = useRef(0);
   const isSticky = useSharedValue(false);
+  const [showScrollButton, setShowScrollButton] = useState(false);
 
   const stickyPaddingStyle = useAnimatedStyle(() => ({
     paddingTop: withTiming(isSticky.value ? safeAreaInsets.top : 12, { duration: 200 }),
@@ -37,6 +39,11 @@ export default function PokemonListPage() {
       const offsetY = e.nativeEvent.contentOffset.y;
       setOffsetY(offsetY);
       isSticky.value = offsetY >= headerHeight.current;
+
+      // Show button after scrolling past ~8 items (approximately 1000px)
+      // Each pokemon card is roughly 120-130px tall with margins
+      const SCROLL_THRESHOLD = 1000;
+      setShowScrollButton(offsetY > SCROLL_THRESHOLD);
     },
     [isSticky, setOffsetY],
   );
@@ -60,6 +67,10 @@ export default function PokemonListPage() {
       pathname: "/pokemon/details",
       params: { id },
     });
+  }, []);
+
+  const scrollToTop = useCallback(() => {
+    refList.current?.scrollToOffset({ offset: 0, animated: true });
   }, []);
 
   const renderItem = useCallback(
@@ -127,6 +138,7 @@ export default function PokemonListPage() {
           }
         />
       )}
+      <FloatingScrollButton visible={showScrollButton} onPress={scrollToTop} />
     </View>
   );
 }
