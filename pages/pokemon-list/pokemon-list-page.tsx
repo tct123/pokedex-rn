@@ -63,10 +63,10 @@ export default function PokemonListPage() {
   const handleScroll = useCallback(
     (e: NativeSyntheticEvent<NativeScrollEvent>) => {
       const offsetY = e.nativeEvent.contentOffset.y;
-      setOffsetY(offsetY);
-      isSticky.value = offsetY >= headerHeight.current;
       const SCROLL_THRESHOLD = 1000;
       setShowScrollButton(offsetY > SCROLL_THRESHOLD);
+      setOffsetY(offsetY);
+      isSticky.value = offsetY >= headerHeight.current;
     },
     [isSticky, setOffsetY],
   );
