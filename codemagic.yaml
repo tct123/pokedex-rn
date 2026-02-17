@@ -13,21 +13,20 @@ workflows:
     scripts:
       - name: Decode keystore
         script: |
-          echo "$CM_KEYSTORE" | base64 --decode > "$FCI_BUILD_DIR/android/app/release.keystore"
+          echo "$CM_KEYSTORE" | base64 --decode > android/app/release.keystore
       - name: Install dependencies
         script: |
           npm install
       - name: Build Android APK
         script: |
           cd android && ./gradlew assembleRelease
-      - name: Publish to Firebase App Distribution
-        script: |
-          echo "$FIREBASE_SERVICE_ACCOUNT" > /tmp/firebase-service-account.json
-          export GOOGLE_APPLICATION_CREDENTIALS=/tmp/firebase-service-account.json
-          npm install -g firebase-tools
-          APK_PATH=$(find android/app/build/outputs -name "*.apk" | head -1)
-          firebase appdistribution:distribute "$APK_PATH" \
-            --app "$FIREBASE_APP_ID" \
-            --groups "testers"
     artifacts:
       - android/app/build/outputs/**/*.apk
+    publishing:
+      firebase:
+        firebase_service_account: $FIREBASE_SERVICE_ACCOUNT
+        android:
+          app_id: 1:781224438706:android:8f05cdecafb314e23352ab
+          groups:
+            - testers
+          artifact_type: apk
