@@ -7,7 +7,7 @@ import {
 
 interface BadgeProps {
   image: ImageSourcePropType;
-  label: string;
+  label?: string;
   backgroundColor: string;
   className?: string;
 }

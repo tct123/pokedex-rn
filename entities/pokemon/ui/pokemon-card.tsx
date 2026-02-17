@@ -7,6 +7,7 @@ import {
   View,
 } from "react-native";
 import { Pokemon } from "../model/pokemon";
+import { AppFonts } from "@/shared/ui/fonts";
 
 interface PokemonCardProps {
   pokemon: Pokemon;

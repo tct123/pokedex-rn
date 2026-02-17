@@ -1,4 +1,5 @@
 import { Pokemon } from "../model/pokemon";
+import { mapPokemonStats } from "../model/pokemon-stats";
 import {
   BugType,
   DarkType,
@@ -32,6 +33,9 @@ export function mapPokemonResponse(pokemonApiResponse: PokemonApiResponse): Poke
     image: `https://raw.githubusercontent.com/HybridShivam/Pokemon/master/assets/images/${String(
       pokemonApiResponse.id
     ).padStart(3, "0")}.png`,
+    stats: mapPokemonStats(pokemonApiResponse.stats),
+    height: pokemonApiResponse.height,
+    weight: pokemonApiResponse.weight,
   };
 }
 
