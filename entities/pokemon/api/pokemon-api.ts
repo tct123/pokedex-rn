@@ -120,10 +120,16 @@ export async function fetchPokemon(id: string): Promise<Pokemon> {
         fetchWeaknesses(pokemon.types.map((t) => t.name)),
       ]);
       pokemon.evolutionChain = flattenChain(evolutionChainResponse.chain);
-      pokemon.weakNesses = weakNessesResponse
-        .map((res) => res.damage_relations.double_damage_from.map((t) => t.name))
-        .flat()
-        .map((typeName) => mapResponseTypeToPokemonType(typeName));
+      const weaknessNames = [
+        ...new Set(
+          weakNessesResponse.flatMap((res) =>
+            res.damage_relations.double_damage_from.map((t) => t.name),
+          ),
+        ),
+      ];
+      pokemon.weakNesses = weaknessNames.map((typeName) =>
+        mapResponseTypeToPokemonType(typeName),
+      );
     } catch (error) {
       console.log("## error", error);
       pokemon.evolutionChain = [];

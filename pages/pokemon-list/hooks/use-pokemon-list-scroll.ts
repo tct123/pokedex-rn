@@ -1,13 +1,22 @@
 import { FlashListRef } from "@shopify/flash-list";
-import { useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
+import { NativeScrollEvent, NativeSyntheticEvent } from "react-native";
+import { usePokemonListContext } from "../context/pokemon-list-context";
 
-export function usePokemonListScroll<T>(listIsNotEmpty: boolean, isSearching: boolean) {
+export function usePokemonListScroll<T>() {
+  const { loadPokemonsState, searchState, headerHeight, isSticky, setShowScrollButton } =
+    usePokemonListContext();
+
+  const listIsNotEmpty =
+    loadPokemonsState.pokemons !== null && loadPokemonsState.pokemons.length > 0;
+  const isSearching = searchState.isSearching;
+
   const refList = useRef<FlashListRef<T> | null>(null);
   const refPreviousIsSearching = useRef(isSearching);
 
   useEffect(() => {
     const wasSearching = refPreviousIsSearching.current;
-    if (wasSearching && listIsNotEmpty) {
+    if (wasSearching !== isSearching && listIsNotEmpty) {
       refList?.current?.scrollToOffset({
         offset: 0,
         animated: true,
@@ -16,5 +25,19 @@ export function usePokemonListScroll<T>(listIsNotEmpty: boolean, isSearching: bo
     refPreviousIsSearching.current = isSearching;
   }, [listIsNotEmpty, isSearching, refList]);
 
-  return { refList };
+  const handleScroll = useCallback(
+    (e: NativeSyntheticEvent<NativeScrollEvent>) => {
+      const offsetY = e.nativeEvent.contentOffset.y;
+      const SCROLL_THRESHOLD = 1000;
+      setShowScrollButton(offsetY > SCROLL_THRESHOLD);
+      isSticky.value = offsetY >= headerHeight.value;
+    },
+    [isSticky, headerHeight, setShowScrollButton],
+  );
+
+  const scrollToTop = useCallback(() => {
+    refList.current?.scrollToOffset({ offset: 0, animated: true });
+  }, []);
+
+  return { refList, handleScroll, scrollToTop };
 }
