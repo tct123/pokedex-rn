@@ -46,7 +46,7 @@ export default function PokemonListPage() {
     loadPokemonsState.pokemons,
     directoryState.previews,
   );
-  const { refList, setOffsetY } = usePokemonListScroll<ListItem>(
+  const { refList } = usePokemonListScroll<ListItem>(
     loadPokemonsState.pokemons !== null && loadPokemonsState.pokemons.length > 0,
     searchState.isSearching,
   );
@@ -84,10 +84,10 @@ export default function PokemonListPage() {
       const offsetY = e.nativeEvent.contentOffset.y;
       const SCROLL_THRESHOLD = 1000;
       setShowScrollButton(offsetY > SCROLL_THRESHOLD);
-      setOffsetY(offsetY);
+      // setOffsetY(offsetY);
       isSticky.value = offsetY >= headerHeight.current;
     },
-    [isSticky, setOffsetY],
+    [isSticky],
   );
 
   const listData: ListItem[] = useMemo(() => {
@@ -199,6 +199,7 @@ export default function PokemonListPage() {
         showsVerticalScrollIndicator={false}
         stickyHeaderIndices={[0]}
         onScroll={handleScroll}
+        keyboardShouldPersistTaps="handled"
         removeClippedSubviews={true}
         ListHeaderComponent={
           <View

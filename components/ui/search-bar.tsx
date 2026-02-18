@@ -1,6 +1,5 @@
 import { TextColors } from "@/constants/theme";
 import { Ionicons } from "@expo/vector-icons";
-import { useState } from "react";
 import { Image, Keyboard, Platform, Pressable, TextInput, View } from "react-native";
 
 interface SearchBarProps {
