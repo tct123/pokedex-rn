@@ -9,6 +9,16 @@ export interface EvolutionStage {
   trigger: string;
 }
 
+export interface PokemonPreview {
+  id: string;
+  name: string;
+}
+
+export interface PokemonLocation {
+  id: string;
+  name: string;
+}
+
 export interface Pokemon {
   id: string;
   name: string;
@@ -25,4 +35,6 @@ export interface Pokemon {
   growthRate?: string;
   baseExperience?: number;
   evolutionChain?: EvolutionStage[];
+  weakNesses?: PokemonType[];
+  locations?: PokemonLocation[];
 }

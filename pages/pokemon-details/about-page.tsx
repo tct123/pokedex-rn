@@ -1,7 +1,6 @@
-import { Badge } from "@/components/ui/badge";
 import { Pokemon } from "@/entities/pokemon";
 import { AppFonts } from "@/shared/ui/fonts";
-import { View, Text, ScrollView } from "react-native";
+import { View, Text, ScrollView, Image } from "react-native";
 
 function formatGender(genderRate?: number) {
   if (genderRate == null || genderRate === -1) {
@@ -38,10 +37,7 @@ function InfoValue({ children }: { children: React.ReactNode }) {
 
 function SectionHeader({ title, color }: { title: string; color: string }) {
   return (
-    <Text
-      className="mt-[30px] text-base"
-      style={{ fontFamily: AppFonts.bold, color }}
-    >
+    <Text className="mt-[30px] text-base" style={{ fontFamily: AppFonts.bold, color }}>
       {title}
     </Text>
   );
@@ -53,10 +49,7 @@ export default function AboutPage({ pokemon }: { pokemon: Pokemon }) {
 
   return (
     <ScrollView className="bg-white rounded-t-[30px] flex-1 flex-col p-8">
-      <Text
-        className="text-base text-text-grey"
-        style={{ fontFamily: AppFonts.regular }}
-      >
+      <Text className="text-base text-text-grey" style={{ fontFamily: AppFonts.regular }}>
         {pokemon.description ?? ""}
       </Text>
       <View>
@@ -74,18 +67,25 @@ export default function AboutPage({ pokemon }: { pokemon: Pokemon }) {
             {pokemon.weight != null ? `${(pokemon.weight / 10).toFixed(1)} kg` : "—"}
           </InfoValue>
         </InfoRow>
-        <InfoRow label="Weakness">
-          <View className="flex-[2] flex-row gap-2">
-            {pokemon.types.map((type) => (
-              <Badge
-                key={`${pokemon.id}-${type.name}`}
-                image={type.icon}
-                label={""}
-                backgroundColor={type.foregroundColor}
-              />
-            ))}
-          </View>
-        </InfoRow>
+        {pokemon.weakNesses && pokemon.weakNesses.length > 0 && (
+          <InfoRow label="Weakness">
+            <View className="flex-[2] flex-row gap-2">
+              {pokemon.weakNesses.map((type) => (
+                <View
+                  key={`${pokemon.id}-${type.name}`}
+                  className="w-7 h-7 rounded items-center justify-center"
+                  style={{ backgroundColor: type.backgroundColor }}
+                >
+                  <Image
+                    source={type.icon}
+                    className="w-3.5 h-3.5"
+                    style={{ tintColor: "white" }}
+                  />
+                </View>
+              ))}
+            </View>
+          </InfoRow>
+        )}
         <InfoRow label="Gender">
           <View className="flex-row flex-[2]">
             {isGenderless ? (
@@ -114,7 +114,6 @@ export default function AboutPage({ pokemon }: { pokemon: Pokemon }) {
           </View>
         </InfoRow>
       </View>
-
       <View>
         <SectionHeader title="Training" color={typeColor} />
         <InfoRow label="EV Yield">
@@ -145,6 +144,18 @@ export default function AboutPage({ pokemon }: { pokemon: Pokemon }) {
           </InfoValue>
         </InfoRow>
       </View>
+      {pokemon.locations && pokemon.locations.length > 0 && (
+        <View>
+          <SectionHeader title="Location" color={typeColor} />
+          {pokemon.locations.map((loc) => (
+            <InfoRow key={loc.id} label={loc.id}>
+              <InfoValue>
+                {loc.name.replaceAll("-", " ").replace(/\b\w/g, (c) => c.toUpperCase())}
+              </InfoValue>
+            </InfoRow>
+          ))}
+        </View>
+      )}
     </ScrollView>
   );
 }

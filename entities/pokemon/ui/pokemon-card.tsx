@@ -1,10 +1,14 @@
 import { Badge } from "@/components/ui/badge";
 import { TextColors } from "@/constants/theme";
 import { Image as ExpoImage } from "expo-image";
-import React from "react";
+import React, { useState } from "react";
 import { Image, Pressable, Text, View } from "react-native";
 import { Pokemon } from "../model/pokemon";
-import Animated, { useAnimatedStyle, useSharedValue, withSpring } from "react-native-reanimated";
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withSpring,
+} from "react-native-reanimated";
 
 interface PokemonCardProps {
   pokemon: Pokemon;
@@ -17,6 +21,7 @@ export const PokemonCard = React.memo(function PokemonCard({
   onTap,
   className,
 }: PokemonCardProps) {
+  const [imageLoadError, setImageLoadError] = useState(false);
   const scaleAnim = useSharedValue(1);
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ scale: scaleAnim.value }],
@@ -41,11 +46,13 @@ export const PokemonCard = React.memo(function PokemonCard({
           className="rounded-[10px] flex-row justify-between mt-6"
           style={{ backgroundColor: pokemon.types[0].backgroundColor }}
         >
-          <View className="p-5">
+          <View className="p-5 flex-1">
             <Text style={{ color: TextColors.number }} className="text-xs font-bold">
               {pokemon.id}
             </Text>
-            <Text className="text-[26px] font-bold text-white">{pokemon.name}</Text>
+            <Text className="text-[26px] font-bold text-white" numberOfLines={1}>
+              {pokemon.name}
+            </Text>
             <View className="flex-row items-center self-start mt-1.5 gap-1.5">
               {pokemon.types.map((type, _) => (
                 <Badge
@@ -65,9 +72,14 @@ export const PokemonCard = React.memo(function PokemonCard({
         />
         <ExpoImage
           source={{ uri: pokemon.image }}
+          placeholder={
+            imageLoadError ? require("@/assets/images/silhouette.png") : undefined
+          }
+          placeholderContentFit="contain"
           style={{ width: 130, height: 130, position: "absolute", right: 10 }}
           cachePolicy="memory-disk"
           recyclingKey={pokemon.id}
+          onError={() => setImageLoadError(true)}
         />
       </Animated.View>
     </Pressable>

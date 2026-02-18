@@ -72,6 +72,7 @@ export default function PokemonDetailsPage() {
   const layout = useWindowDimensions();
   const insets = useSafeAreaInsets();
   const [index, setIndex] = useState(0);
+  const [imageLoaded, setImageLoaded] = useState(false);
 
   const renderScene = useCallback(
     ({ route }: any) => {
@@ -125,9 +126,10 @@ export default function PokemonDetailsPage() {
                 source={require("@/assets/images/circle.png")}
                 className="mr-6"
               >
-                <ExpoImage source={{ uri: pokemon.image }} style={{ width: 125, height: 125 }} cachePolicy="memory-disk" />
+                <ExpoImage source={{ uri: pokemon.image }} placeholder={require("@/assets/images/silhouette.png")} placeholderContentFit="contain" style={{ width: 125, height: 125 }} tintColor={imageLoaded ? undefined : "#A0A0A0"} cachePolicy="memory-disk" onLoad={() => setImageLoaded(true)} />
               </ImageBackground>
               <PokemonInfo
+              className="flex-1"
                 id={`#${pokemon.id}`}
                 name={pokemon.name}
                 types={pokemon.types}

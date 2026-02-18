@@ -60,6 +60,6 @@ export function mapPokemonResponse(pokemonApiResponse: PokemonApiResponse): Poke
   };
 }
 
-const mapResponseTypeToPokemonType = (type: string): PokemonType => {
+export const mapResponseTypeToPokemonType = (type: string): PokemonType => {
   return TYPE_MAP[String(type).toLowerCase()] ?? TYPE_MAP.normal;
 };

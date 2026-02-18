@@ -1,5 +1,5 @@
-import { Pokemon } from "@/entities/pokemon";
-import { searchPokemonByName } from "@/entities/pokemon/api/pokemon-api";
+import { Pokemon, PokemonPreview } from "@/entities/pokemon";
+import { fetchPokemon } from "@/entities/pokemon/api/pokemon-api";
 import { pokemonKeys } from "@/shared/lib/query-keys";
 import { useQuery } from "@tanstack/react-query";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -24,44 +24,43 @@ interface SearchTermTimeout {
   name: string;
 }
 
-function filterPokemonsByText(pokemons: Pokemon[], text: string): Pokemon[] {
-  if (text.length === 0) return pokemons;
+function filterPreviewsByText(previews: PokemonPreview[], text: string): PokemonPreview[] {
   const searchTerm = text.toLowerCase();
-  return pokemons.filter((pokemon) => {
-    // Match by name
-    if (pokemon.name.toLowerCase().includes(searchTerm)) {
+  return previews.filter((preview) => {
+    if (preview.name.toLowerCase().includes(searchTerm)) {
       return true;
     }
-    // Match by ID (handle both padded "025" and unpadded "25")
     const numericId = Number(searchTerm);
     if (!isNaN(numericId)) {
-      return Number(pokemon.id) === numericId;
+      return Number(preview.id) === numericId;
     }
     return false;
   });
 }
 
-export function useFilterPokemonList(pokemons: Pokemon[] | null) {
+export function useFilterPokemonList(
+  pokemons: Pokemon[] | null,
+  previews: PokemonPreview[] | null,
+) {
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
   const timerRef = useRef<SearchTermTimeout | null>(null);
 
-  // Filter local Pokemon list
-  const filteredPokemons = useMemo(() => {
-    if (!pokemons) return null;
-    return filterPokemonsByText(pokemons, debouncedSearchTerm);
-  }, [pokemons, debouncedSearchTerm]);
+  const shouldSearch = debouncedSearchTerm.length > 0 && previews !== null;
 
-  // Trigger API search only when local filtering returns no results
-  const shouldSearchApi =
-    debouncedSearchTerm.length > 0 &&
-    filteredPokemons !== null &&
-    filteredPokemons.length === 0;
+  const matchingPreviewIds = useMemo(() => {
+    if (!shouldSearch) return [];
+    return filterPreviewsByText(previews!, debouncedSearchTerm).map((p) => p.id);
+  }, [shouldSearch, previews, debouncedSearchTerm]);
 
-  // API search query
-  const apiSearchQuery = useQuery({
+  const directorySearchQuery = useQuery({
     queryKey: pokemonKeys.search(debouncedSearchTerm),
-    queryFn: () => searchPokemonByName(debouncedSearchTerm),
-    enabled: shouldSearchApi,
+    queryFn: async () => {
+      const results = await Promise.allSettled(matchingPreviewIds.map((id) => fetchPokemon(id)));
+      return results
+        .filter((r): r is PromiseFulfilledResult<Pokemon> => r.status === "fulfilled")
+        .map((r) => r.value);
+    },
+    enabled: shouldSearch && matchingPreviewIds.length > 0,
   });
 
   const onSearch = useCallback((name: string) => {
@@ -70,7 +69,7 @@ export function useFilterPokemonList(pokemons: Pokemon[] | null) {
     }
     const timeout = setTimeout(() => {
       setDebouncedSearchTerm(name);
-    }, 300);
+    }, 500);
     timerRef.current = {
       timeoutRef: timeout,
       name: name,
@@ -87,29 +86,23 @@ export function useFilterPokemonList(pokemons: Pokemon[] | null) {
     };
   }, []);
 
-  // Determine final Pokemon list
   const finalPokemons = useMemo(() => {
-    // If API search is loading, return empty array to keep list mounted
-    if (shouldSearchApi && apiSearchQuery.isLoading) {
-      return [];
-    }
+    if (!shouldSearch) return pokemons;
+    if (matchingPreviewIds.length === 0) return [];
+    if (directorySearchQuery.isLoading) return [];
+    if (directorySearchQuery.data) return directorySearchQuery.data;
+    return [];
+  }, [shouldSearch, pokemons, matchingPreviewIds.length, directorySearchQuery.isLoading, directorySearchQuery.data]);
 
-    // If API search has a result, return it as a single-item array
-    if (shouldSearchApi && apiSearchQuery.data) {
-      return [apiSearchQuery.data];
-    }
-
-    // Otherwise, return local filtered results
-    return filteredPokemons;
-  }, [shouldSearchApi, apiSearchQuery.isLoading, apiSearchQuery.data, filteredPokemons]);
+  const isDirectorySearching = shouldSearch && matchingPreviewIds.length > 0 && directorySearchQuery.isLoading;
 
   const memoizedState = useMemo(
     () => ({
       pokemons: finalPokemons,
       isSearching: debouncedSearchTerm.length > 0,
-      isApiSearching: shouldSearchApi && apiSearchQuery.isLoading,
+      isApiSearching: isDirectorySearching,
     }),
-    [finalPokemons, debouncedSearchTerm, shouldSearchApi, apiSearchQuery.isLoading],
+    [finalPokemons, debouncedSearchTerm, isDirectorySearching],
   );
 
   return {

@@ -38,6 +38,7 @@ export function SearchBar({
         placeholder={placeholder}
         placeholderTextColor={TextColors.grey}
         onChangeText={handleChange}
+        returnKeyType="search"
         style={{
           includeFontPadding: false,
           paddingVertical: 0,

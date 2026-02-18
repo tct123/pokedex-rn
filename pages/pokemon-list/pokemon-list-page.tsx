@@ -6,6 +6,7 @@ import { LightColors } from "@/constants/theme";
 import { Pokemon, PokemonCard } from "@/entities/pokemon";
 import { useLoadPokemons } from "@/features/load-pokemons";
 import { useFilterPokemonList } from "@/features/filter-pokemon-list";
+import { usePrefetchPokemonDirectory } from "@/features/prefetch-pokemon-directory";
 import { FlashList } from "@shopify/flash-list";
 import { useCallback, useMemo, useRef, useState } from "react";
 import {
@@ -37,9 +38,13 @@ type ListItem =
     };
 
 export default function PokemonListPage() {
-  const { state: loadPokemonsState, actions: loadPokemonsActions } = useLoadPokemons();
+  const { state: directoryState } = usePrefetchPokemonDirectory();
+  const { state: loadPokemonsState, actions: loadPokemonsActions } = useLoadPokemons(
+    directoryState.previews,
+  );
   const { state: searchState, actions: searchActions } = useFilterPokemonList(
     loadPokemonsState.pokemons,
+    directoryState.previews,
   );
   const { refList, setOffsetY } = usePokemonListScroll<ListItem>(
     loadPokemonsState.pokemons !== null && loadPokemonsState.pokemons.length > 0,

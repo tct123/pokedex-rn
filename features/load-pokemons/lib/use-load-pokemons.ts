@@ -1,5 +1,5 @@
-import { Pokemon } from "@/entities/pokemon";
-import { fetchPokemon, fetchPokemons } from "@/entities/pokemon/api/pokemon-api";
+import { Pokemon, PokemonPreview } from "@/entities/pokemon";
+import { fetchPokemon } from "@/entities/pokemon/api/pokemon-api";
 import { pokemonKeys } from "@/shared/lib/query-keys";
 import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 import { useMemo } from "react";
@@ -25,24 +25,26 @@ export interface LoadPokemonsResult {
 /**
  * Hook for loading Pokemon data with pagination using React Query.
  *
+ * @param previews - Full directory of Pokemon previews (used as ID source for pagination)
  * @param limit - Number of Pokemon to load per page (default: 30)
  */
-export function useLoadPokemons(limit: number = 30) {
+export function useLoadPokemons(previews: PokemonPreview[] | null, limit: number = 30) {
   const queryClient = useQueryClient();
 
   const query = useInfiniteQuery({
     queryKey: pokemonKeys.lists(),
     queryFn: async ({ pageParam }) => {
-      const ids = await fetchPokemons(limit, pageParam);
+      const page = previews!.slice(pageParam, pageParam + limit);
       const pokemons = await Promise.all(
-        ids.map(async (id) => {
-          const pokemon = await fetchPokemon(id);
-          queryClient.setQueryData(pokemonKeys.detail(id), pokemon);
+        page.map(async (preview) => {
+          const pokemon = await fetchPokemon(preview.id);
+          queryClient.setQueryData(pokemonKeys.detail(preview.id), pokemon);
           return pokemon;
         })
       );
       return pokemons;
     },
+    enabled: previews !== null,
     initialPageParam: 0,
     getNextPageParam: (lastPage, _allPages, lastPageParam) => {
       return lastPage.length < limit ? undefined : lastPageParam + limit;
@@ -53,7 +55,7 @@ export function useLoadPokemons(limit: number = 30) {
 
   const state = useMemo(
     () => ({
-      loading: query.isLoading,
+      loading: query.isLoading || previews === null,
       isNextPageLoading: query.isFetchingNextPage,
       error: query.error?.message ?? null,
       isFirstPageError: !!query.error && !hasData,
@@ -67,6 +69,7 @@ export function useLoadPokemons(limit: number = 30) {
       query.data,
       query.hasNextPage,
       hasData,
+      previews,
     ]
   );
 
