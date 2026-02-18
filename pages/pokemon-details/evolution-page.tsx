@@ -4,16 +4,18 @@ import { AppFonts } from "@/shared/ui/fonts";
 import { Image as ExpoImage } from "expo-image";
 import { useRouter } from "expo-router";
 import { View, Text, ScrollView, Pressable } from "react-native";
-import Animated, { useAnimatedStyle, useSharedValue, withSpring } from "react-native-reanimated";
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withSpring,
+} from "react-native-reanimated";
 
 function EvolutionPair({
   from,
   to,
-  typeColor,
 }: {
   from: EvolutionStage;
   to: EvolutionStage;
-  typeColor: string;
 }) {
   const triggerLabel =
     to.minLevel != null
@@ -26,14 +28,13 @@ function EvolutionPair({
         : "";
 
   return (
-    <View className="flex-row items-center justify-between mb-6">
+    <View className="flex-row items-center justify-between mb-8">
       <PokemonStageView stage={from} />
       <View className="items-center flex-1">
-        <Text className="text-xl text-text-grey">→</Text>
+        <Text className="text-3xl text-text-grey/20">→</Text>
         {triggerLabel ? (
           <Text
-            className="text-xs mt-1"
-            style={{ fontFamily: AppFonts.medium, color: typeColor }}
+            className="text-xs mt-1 text-text-black font-bold"
           >
             ({triggerLabel})
           </Text>
@@ -60,7 +61,7 @@ function PokemonStageView({ stage }: { stage: EvolutionStage }) {
 
   return (
     <Pressable
-      className="items-center w-[120px]"
+      className="items-center w-[100px]"
       onPressIn={handlePressIn}
       onPressOut={handlePressOut}
       onPress={() =>
@@ -71,22 +72,34 @@ function PokemonStageView({ stage }: { stage: EvolutionStage }) {
       }
     >
       <Animated.View style={style}>
-        <View className="w-20 h-20 rounded-full bg-grey-light items-center justify-center">
+        <View
+          style={{
+            width: 100,
+            height: 100,
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <ExpoImage
+            source={require("@/assets/images/gradient_pokeball.png")}
+            style={{ width: 100, height: 100, position: "absolute" }}
+            contentFit="contain"
+          />
           <ExpoImage
             source={{ uri: stage.image }}
-            style={{ width: 64, height: 64 }}
+            style={{ width: 75, height: 75 }}
             contentFit="contain"
             cachePolicy="memory-disk"
           />
         </View>
         <Text
-          className="text-xs text-text-grey mt-2"
+          className="text-xs text-text-grey text-center mt-2"
           style={{ fontFamily: AppFonts.regular }}
         >
           #{stage.id}
         </Text>
         <Text
-          className="text-sm text-text-black mt-0.5"
+          className="text-sm text-text-black text-center mt-0.5"
           style={{ fontFamily: AppFonts.bold }}
         >
           {stage.name}
@@ -127,7 +140,6 @@ export default function EvolutionPage({ pokemon }: { pokemon: Pokemon }) {
               key={from.id}
               from={from}
               to={chain[index + 1]}
-              typeColor={typeColor}
             />
           ))
       )}

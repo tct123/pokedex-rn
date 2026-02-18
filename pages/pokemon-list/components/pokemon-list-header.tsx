@@ -19,7 +19,7 @@ export const PokemonListHeader = () => {
   return (
     <View onLayout={handleLayout}>
       <ImageBackground
-        source={require("@/assets/images/gradient_pokeball.png")}
+        source={require("@/assets/images/gradient_pokeball_half.png")}
         imageStyle={{
           height: "80%",
           width: "100%",
