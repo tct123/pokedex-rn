@@ -45,18 +45,24 @@ const TYPE_MAP: Record<string, PokemonType> = {
 };
 
 export function mapPokemonResponse(pokemonApiResponse: PokemonApiResponse): Pokemon {
+  const evYieldMap = pokemonApiResponse.training.ev_yield.reduce(
+    (acc, { stat, amount }) => {
+      acc[stat.toLowerCase()] = amount;
+      return acc;
+    },
+    {} as Record<string, number>,
+  );
+
   return {
     id: String(pokemonApiResponse.id).padStart(3, "0"),
     name: `${pokemonApiResponse.name.charAt(0).toUpperCase()}${pokemonApiResponse.name.slice(1)}`,
     types: pokemonApiResponse.types.map((type) => {
-      return mapResponseTypeToPokemonType(type.type.name);
+      return mapResponseTypeToPokemonType(type);
     }),
-    image: `https://raw.githubusercontent.com/HybridShivam/Pokemon/master/assets/images/${String(
-      pokemonApiResponse.id
-    ).padStart(3, "0")}.png`,
-    stats: mapPokemonStats(pokemonApiResponse.stats),
-    height: pokemonApiResponse.height,
-    weight: pokemonApiResponse.weight,
+    image: pokemonApiResponse.sprite_url,
+    stats: mapPokemonStats(pokemonApiResponse.stats.base, evYieldMap),
+    height: pokemonApiResponse.about.height_m,
+    weight: pokemonApiResponse.about.weight_kg,
   };
 }
 

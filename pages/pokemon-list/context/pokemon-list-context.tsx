@@ -1,11 +1,11 @@
-import { createContext, useCallback, useContext, useState } from "react";
+import { createContext, useCallback, useContext, useRef, useState } from "react";
 import { useSharedValue, type SharedValue } from "react-native-reanimated";
 import { useLoadPokemons, type LoadPokemonsResult } from "@/features/load-pokemons";
-import {
-  useFilterPokemonList,
-  type PokemonSearchResult,
-} from "@/features/filter-pokemon-list";
-import { usePrefetchPokemonDirectory } from "@/features/prefetch-pokemon-directory";
+
+interface SearchTimeout {
+  timeoutRef: ReturnType<typeof setTimeout>;
+  value: string;
+}
 
 interface PokemonListContextValue {
   headerHeight: SharedValue<number>;
@@ -14,7 +14,6 @@ interface PokemonListContextValue {
   setShowScrollButton: (value: boolean) => void;
   loadPokemonsState: LoadPokemonsResult["state"];
   loadPokemonsActions: LoadPokemonsResult["actions"];
-  searchState: PokemonSearchResult["state"];
   searchValue: string;
   handleSearch: (text: string) => void;
 }
@@ -26,23 +25,25 @@ export function PokemonListProvider({ children }: { children: React.ReactNode })
   const isSticky = useSharedValue(false);
   const [showScrollButton, setShowScrollButton] = useState(false);
 
-  const { state: directoryState } = usePrefetchPokemonDirectory();
-  const { state: loadPokemonsState, actions: loadPokemonsActions } = useLoadPokemons(
-    directoryState.previews,
-  );
-  const { state: searchState, actions: searchActions } = useFilterPokemonList(
-    loadPokemonsState.pokemons,
-    directoryState.previews,
-  );
-
   const [searchValue, setSearchValue] = useState("");
-  const handleSearch = useCallback(
-    (text: string) => {
+  const searchTimeoutRef = useRef<SearchTimeout | null>(null);
+  
+  const { state: loadPokemonsState, actions: loadPokemonsActions } = useLoadPokemons({
+    searchQuery: searchValue,
+  });
+
+  const handleSearch = useCallback((text: string) => {
+    if (searchTimeoutRef.current?.timeoutRef) {
+      clearTimeout(searchTimeoutRef.current.timeoutRef);
+    }
+    const timeout = setTimeout(() => {
       setSearchValue(text);
-      searchActions.onSearch(text);
-    },
-    [searchActions],
-  );
+    }, 300);
+    searchTimeoutRef.current = {
+      timeoutRef: timeout,
+      value: text,
+    };
+  }, []);
 
   return (
     <PokemonListContext.Provider
@@ -53,7 +54,6 @@ export function PokemonListProvider({ children }: { children: React.ReactNode })
         setShowScrollButton,
         loadPokemonsState,
         loadPokemonsActions,
-        searchState,
         searchValue,
         handleSearch,
       }}

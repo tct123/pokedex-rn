@@ -6,21 +6,13 @@ import { useCallback } from "react";
 import { ActivityIndicator, View } from "react-native";
 import { PokemonListHeader } from "./components/pokemon-list-header";
 import { PokemonListItem } from "./components/pokemon-list-item";
-import { PokemonListProvider, usePokemonListContext } from "./context/pokemon-list-context";
+import { usePokemonListContext } from "./context/pokemon-list-context";
 import { usePokemonListData, type ListItem } from "./hooks/use-pokemon-list-data";
 import { usePokemonListScroll } from "./hooks/use-pokemon-list-scroll";
 import { usePokemonListToast } from "./hooks/use-pokemon-list-toast";
 
 export default function PokemonListPage() {
-  return (
-    <PokemonListProvider>
-      <PokemonListPageContent />
-    </PokemonListProvider>
-  );
-}
-
-function PokemonListPageContent() {
-  const { showScrollButton, loadPokemonsState, loadPokemonsActions, searchState } =
+  const { showScrollButton, loadPokemonsState, loadPokemonsActions } =
     usePokemonListContext();
   const { refList, handleScroll, scrollToTop } = usePokemonListScroll<ListItem>();
   const { listData, showFooterLoading } = usePokemonListData();
@@ -28,8 +20,7 @@ function PokemonListPageContent() {
 
   const renderItem = useCallback(
     ({ item }: { item: ListItem }) => <PokemonListItem item={item} />,
-    [],
-  );
+    []);
 
   return (
     <View className="flex-1">
@@ -47,7 +38,7 @@ function PokemonListPageContent() {
         removeClippedSubviews={true}
         ListHeaderComponent={<PokemonListHeader />}
         onEndReached={
-          searchState.isSearching || loadPokemonsState.endOfItems
+          loadPokemonsState.endOfItems
             ? undefined
             : loadPokemonsActions.fetchNextPage
         }
