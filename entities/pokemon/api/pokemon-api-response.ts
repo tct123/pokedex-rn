@@ -1,5 +1,13 @@
 import { PokemonStatResponse } from "../model/pokemon-stats";
 
+export interface EvolutionChainApiResponse {
+  id: number;
+  name: string;
+  sprite_url: string;
+  trigger: string | null;
+  evolves_to: EvolutionChainApiResponse[];
+}
+
 export interface PokemonApiResponse {
   id: number;
   number: string;
@@ -34,10 +42,5 @@ export interface PokemonApiResponse {
     growth_rate: string;
   };
   locations: { id: number; name: string }[];
-  evolution_chain: {
-    id: number;
-    name: string;
-    sprite_url: string;
-    trigger: string | null;
-  }[];
+  evolution_chain: EvolutionChainApiResponse[];
 }

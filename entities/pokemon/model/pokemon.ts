@@ -7,6 +7,7 @@ export interface EvolutionStage {
   image: string;
   minLevel: number | null;
   trigger: string;
+  evolvesTo: EvolutionStage[];
 }
 
 export interface PokemonPreview {

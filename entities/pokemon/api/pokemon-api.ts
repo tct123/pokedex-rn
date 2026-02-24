@@ -1,5 +1,5 @@
 import { EvolutionStage, Pokemon } from "../model/pokemon";
-import { PokemonApiResponse } from "./pokemon-api-response";
+import { PokemonApiResponse, EvolutionChainApiResponse } from "./pokemon-api-response";
 import { mapResponseTypeToPokemonType } from "./pokemon-mapper";
 import { mapPokemonStats } from "../model/pokemon-stats";
 
@@ -10,14 +10,19 @@ export function extractIdFromUrl(url: string): string {
   return segments[segments.length - 1];
 }
 
-function mapEvolutionChain(chain: { id: number; name: string; sprite_url: string; trigger: string | null }[]): EvolutionStage[] {
-  return chain.map((stage) => ({
+function mapEvolutionChain(
+  chain: EvolutionChainApiResponse[]
+): EvolutionStage[] {
+  const mapStage = (stage: EvolutionChainApiResponse): EvolutionStage => ({
     id: String(stage.id).padStart(3, "0"),
     name: stage.name,
     image: stage.sprite_url,
     minLevel: null,
     trigger: stage.trigger ?? "",
-  }));
+    evolvesTo: (stage.evolves_to || []).map(mapStage),
+  });
+
+  return chain.map(mapStage);
 }
 
 export async function fetchPokemon(id: string): Promise<Pokemon> {

@@ -11,31 +11,6 @@ import Animated, {
   withSpring,
 } from "react-native-reanimated";
 
-function EvolutionPair({ from, to }: { from: EvolutionStage; to: EvolutionStage }) {
-  const triggerLabel =
-    to.minLevel != null
-      ? `Level ${to.minLevel}`
-      : to.trigger
-        ? to.trigger
-            .split("-")
-            .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-            .join(" ")
-        : "";
-
-  return (
-    <View className="flex-row items-center justify-between mb-8">
-      <PokemonStageView stage={from} />
-      <View className="items-center flex-1">
-        <Text className="text-3xl text-text-grey/20">→</Text>
-        {triggerLabel ? (
-          <Text className="text-xs mt-1 text-text-black font-bold">({triggerLabel})</Text>
-        ) : null}
-      </View>
-      <PokemonStageView stage={to} />
-    </View>
-  );
-}
-
 function PokemonStageView({ stage }: { stage: EvolutionStage }) {
   const router = useRouter();
   const scale = useSharedValue(1);
@@ -103,9 +78,84 @@ function PokemonStageView({ stage }: { stage: EvolutionStage }) {
   );
 }
 
+function EvolutionRow({
+  from,
+  to,
+}: {
+  from: EvolutionStage;
+  to: EvolutionStage;
+}) {
+  const triggerLabel = to.trigger
+    ? to.trigger
+        .split("-")
+        .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+        .join(" ")
+    : "";
+
+  return (
+    <View className="flex-row items-center justify-between mb-8">
+      <PokemonStageView stage={from} />
+      <View className="items-center flex-1">
+        <Text className="text-3xl text-text-grey/20">→</Text>
+        {triggerLabel ? (
+          <Text className="text-xs mt-1 text-text-black font-bold">
+            ({triggerLabel})
+          </Text>
+        ) : null}
+      </View>
+      <PokemonStageView stage={to} />
+    </View>
+  );
+}
+
+function EvolutionTree({
+  stage,
+}: {
+  stage: EvolutionStage;
+}) {
+  const children = stage.evolvesTo || [];
+
+  if (children.length === 0) {
+    return null;
+  }
+
+  return (
+    <View>
+      {children.map((evolution) => (
+        <EvolutionRow key={`${stage.id}-${evolution.id}`} from={stage} to={evolution} />
+      ))}
+      {children.map((child) => (
+        <EvolutionTree key={`sub-${child.id}`} stage={child} />
+      ))}
+    </View>
+  );
+}
+
 export default function EvolutionPage({ pokemon }: { pokemon: Pokemon }) {
   const chain = pokemon.evolutionChain ?? [];
   const typeColor = pokemon.types[0].foregroundColor;
+
+  if (chain.length === 0 || (chain.length === 1 && (chain[0].evolvesTo?.length ?? 0) === 0)) {
+    return (
+      <ScrollView
+        className="bg-white rounded-t-[30px] flex-1"
+        contentContainerStyle={{ padding: 32 }}
+      >
+        <Text
+          className="text-base mb-6"
+          style={{ fontFamily: AppFonts.bold, color: typeColor }}
+        >
+          Evolution Chart
+        </Text>
+        <Text
+          className="text-sm text-text-grey text-center mt-10"
+          style={{ fontFamily: AppFonts.regular }}
+        >
+          No evolutions
+        </Text>
+      </ScrollView>
+    );
+  }
 
   return (
     <ScrollView
@@ -119,20 +169,9 @@ export default function EvolutionPage({ pokemon }: { pokemon: Pokemon }) {
         Evolution Chart
       </Text>
 
-      {chain.length <= 1 ? (
-        <Text
-          className="text-sm text-text-grey text-center mt-10"
-          style={{ fontFamily: AppFonts.regular }}
-        >
-          No evolutions
-        </Text>
-      ) : (
-        chain
-          .slice(0, -1)
-          .map((from, index) => (
-            <EvolutionPair key={from.id} from={from} to={chain[index + 1]} />
-          ))
-      )}
+      {chain.map((stage) => (
+        <EvolutionTree key={stage.id} stage={stage} />
+      ))}
     </ScrollView>
   );
 }
