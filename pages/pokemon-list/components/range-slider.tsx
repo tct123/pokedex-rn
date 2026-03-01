@@ -1,5 +1,5 @@
 import { LightColors, TextColors } from "@/constants/theme";
-import React, { useCallback } from "react";
+import React, { useCallback, useEffect } from "react";
 import { LayoutChangeEvent, Text, View } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Animated, {
@@ -33,6 +33,12 @@ export function RangeSlider({
   const highStart = useSharedValue(0);
 
   const range = max - min;
+
+  useEffect(() => {
+    if (sliderWidth.value === 0) return;
+    lowOffset.value = ((lowValue - min) / range) * sliderWidth.value;
+    highOffset.value = ((highValue - min) / range) * sliderWidth.value;
+  }, [lowValue, highValue, min, range, sliderWidth, lowOffset, highOffset]);
 
   const handleLayout = useCallback(
     (e: LayoutChangeEvent) => {
