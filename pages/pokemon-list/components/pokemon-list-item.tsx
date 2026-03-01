@@ -1,9 +1,9 @@
 import { SearchBar } from "@/components/ui/search-bar";
 import { EmptyState } from "@/components/ui/empty-state";
-import { LightColors } from "@/constants/theme";
+import { LightColors, TextColors } from "@/constants/theme";
 import { PokemonCard } from "@/entities/pokemon";
 import { memo, useCallback } from "react";
-import { ActivityIndicator, Text } from "react-native";
+import { ActivityIndicator, Image, Text, TouchableOpacity, View } from "react-native";
 import Animated, { useAnimatedStyle, withTiming } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { usePokemonListContext } from "../context/pokemon-list-context";
@@ -12,7 +12,7 @@ import type { ListItem } from "../hooks/use-pokemon-list-data";
 import type { Pokemon } from "@/entities/pokemon";
 
 export const PokemonSearchBarItem = memo(function PokemonSearchBarItem() {
-  const { isSticky, searchValue, handleSearch } = usePokemonListContext();
+  const { isSticky, searchText, handleSearch } = usePokemonListContext();
   const safeAreaInsets = useSafeAreaInsets();
 
   const stickyPaddingStyle = useAnimatedStyle(() => ({
@@ -25,7 +25,7 @@ export const PokemonSearchBarItem = memo(function PokemonSearchBarItem() {
       style={stickyPaddingStyle}
     >
       <SearchBar
-        value={searchValue}
+        value={searchText}
         onSearch={handleSearch}
         placeholder="What Pokémon are you looking for?"
       />
@@ -62,8 +62,32 @@ export function PokemonListItem({ item }: { item: ListItem }) {
 }
 
 function PokemonErrorItem() {
-  const { loadPokemonsState } = usePokemonListContext();
-  return <Text className="flex-1 self-center">Error: {loadPokemonsState.error}</Text>;
+  const { loadPokemonsActions } = usePokemonListContext();
+  return (
+    <View className="py-12 px-6 items-center">
+      <Image
+        source={require("@/assets/images/magikarp.png")}
+        className="w-40 h-40 mb-4"
+        resizeMode="contain"
+      />
+      <Text className="text-xl font-bold text-center mb-2" style={{ color: TextColors.black }}>
+        Connection failed
+      </Text>
+      <Text className="text-sm text-center mb-6" style={{ color: TextColors.grey }}>
+        Check your internet connection and try again.
+      </Text>
+      <TouchableOpacity
+        className="px-8 py-3 rounded-2xl"
+        style={{ backgroundColor: LightColors.primary }}
+        onPress={loadPokemonsActions.refetch}
+        activeOpacity={0.7}
+      >
+        <Text className="text-base font-semibold" style={{ color: TextColors.white }}>
+          Try again
+        </Text>
+      </TouchableOpacity>
+    </View>
+  );
 }
 
 const PokemonCardItem = memo(function PokemonCardItem({

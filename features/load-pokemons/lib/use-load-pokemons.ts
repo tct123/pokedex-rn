@@ -15,6 +15,7 @@ interface LoadPokemonsState {
 
 interface LoadPokemonsAction {
   fetchNextPage: () => void;
+  refetch: () => void;
 }
 
 export interface LoadPokemonsResult {
@@ -68,14 +69,17 @@ export function useLoadPokemons({ limit = 30, apiParams = {} }: UseLoadPokemonsO
     ]
   );
 
-  const { fetchNextPage } = query;
+  const { fetchNextPage, refetch } = query;
   const actions = useMemo(
     () => ({
       fetchNextPage: () => {
         fetchNextPage();
       },
+      refetch: () => {
+        refetch();
+      },
     }),
-    [fetchNextPage]
+    [fetchNextPage, refetch]
   );
 
   return {

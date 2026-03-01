@@ -66,6 +66,7 @@ interface PokemonListContextValue {
   setShowScrollButton: (value: boolean) => void;
   loadPokemonsState: LoadPokemonsResult["state"];
   loadPokemonsActions: LoadPokemonsResult["actions"];
+  searchText: string;
   searchValue: string;
   handleSearch: (text: string) => void;
   filters: PokemonFilters;
@@ -83,6 +84,7 @@ export function PokemonListProvider({ children }: { children: React.ReactNode })
   const isSticky = useSharedValue(false);
   const [showScrollButton, setShowScrollButton] = useState(false);
 
+  const [searchText, setSearchText] = useState("");
   const [searchValue, setSearchValue] = useState("");
   const searchTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [filters, setFilters] = useState<PokemonFilters>(DEFAULT_FILTERS);
@@ -104,6 +106,7 @@ export function PokemonListProvider({ children }: { children: React.ReactNode })
   const { state: loadPokemonsState, actions: loadPokemonsActions } = useLoadPokemons({ apiParams });
 
   const handleSearch = useCallback((text: string) => {
+    setSearchText(text);
     if (searchTimeoutRef.current) {
       clearTimeout(searchTimeoutRef.current);
     }
@@ -125,6 +128,7 @@ export function PokemonListProvider({ children }: { children: React.ReactNode })
         setShowScrollButton,
         loadPokemonsState,
         loadPokemonsActions,
+        searchText,
         searchValue,
         handleSearch,
         filters,
