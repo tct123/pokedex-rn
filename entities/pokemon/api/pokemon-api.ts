@@ -76,28 +76,47 @@ export async function fetchPokemon(id: string): Promise<Pokemon> {
   }
 }
 
-export async function fetchPokemons(limit: number, offset: number): Promise<Pokemon[]> {
-  const response = await fetch(`${BASE_URL}/pokemon?limit=${limit}&offset=${offset}`);
-  if (!response.ok) {
-    throw new Error("Network response was not ok");
-  }
-  const data = await response.json();
-  
-  return data.results.map((p: PokemonApiResponse) => mapApiResponseToPokemon(p));
+export interface PokemonListParams {
+  limit: number;
+  offset: number;
+  query?: string;
+  sort_by?: "Name" | "Number";
+  sort_order?: "Asc" | "Desc";
+  type?: string;
+  weakness?: string;
+  height_min?: number;
+  height_max?: number;
+  weight_min?: number;
+  weight_max?: number;
+  number_from?: number;
+  number_to?: number;
+  generation?: number;
 }
 
-export async function fetchPokemonsByQuery(query: string, limit: number, offset: number): Promise<Pokemon[]> {
-  const params = new URLSearchParams({
-    query,
-    limit: String(limit),
-    offset: String(offset),
+export async function fetchPokemons(params: PokemonListParams): Promise<Pokemon[]> {
+  const searchParams = new URLSearchParams({
+    limit: String(params.limit),
+    offset: String(params.offset),
   });
-  const response = await fetch(`${BASE_URL}/pokemon?${params}`);
+  if (params.query) searchParams.set("query", params.query);
+  if (params.sort_by) searchParams.set("sort_by", params.sort_by);
+  if (params.sort_order) searchParams.set("sort_order", params.sort_order);
+  if (params.type) searchParams.set("type", params.type);
+  if (params.weakness) searchParams.set("weakness", params.weakness);
+  if (params.height_min !== undefined) searchParams.set("height_min", String(params.height_min));
+  if (params.height_max !== undefined) searchParams.set("height_max", String(params.height_max));
+  if (params.weight_min !== undefined) searchParams.set("weight_min", String(params.weight_min));
+  if (params.weight_max !== undefined) searchParams.set("weight_max", String(params.weight_max));
+  if (params.number_from !== undefined) searchParams.set("number_from", String(params.number_from));
+  if (params.number_to !== undefined) searchParams.set("number_to", String(params.number_to));
+  if (params.generation !== undefined) searchParams.set("generation", String(params.generation));
+
+  const response = await fetch(`${BASE_URL}/pokemon?${searchParams}`);
   if (!response.ok) {
     throw new Error("Network response was not ok");
   }
   const data = await response.json();
-  
+
   return data.results.map((p: PokemonApiResponse) => mapApiResponseToPokemon(p));
 }
 

@@ -56,8 +56,8 @@ export function SearchBar({
         style={{
           paddingVertical: 0,
           includeFontPadding: false,
-          lineHeight: 0,
-          textAlignVertical: Platform.OS === "android" ? "top" : undefined,
+          lineHeight: Platform.OS === "android" ? undefined : 0,
+          textAlignVertical: Platform.OS === "android" ? "center" : undefined,
         }}
         value={localValue}
       />

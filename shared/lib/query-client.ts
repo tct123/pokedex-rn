@@ -1,4 +1,4 @@
-import { QueryClient } from '@tanstack/react-query';
+import { QueryClient, QueryCache } from '@tanstack/react-query';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createAsyncStoragePersister } from '@tanstack/query-async-storage-persister';
 
@@ -9,6 +9,11 @@ export const persister = createAsyncStoragePersister({
 });
 
 export const queryClient = new QueryClient({
+  queryCache: new QueryCache({
+    onError: (error, query) => {
+      console.warn('[Query error]', query.queryKey, error.message);
+    },
+  }),
   defaultOptions: {
     queries: {
       staleTime: Infinity, // Data never goes stale - treat as permanent database

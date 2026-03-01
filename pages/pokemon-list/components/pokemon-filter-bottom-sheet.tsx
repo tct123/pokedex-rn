@@ -9,11 +9,11 @@ import { Image } from "expo-image";
 import React, { forwardRef, useCallback, useMemo, useState } from "react";
 import {
   Pressable,
-  ScrollView,
   Text,
   TouchableOpacity,
   View,
 } from "react-native";
+import { ScrollView } from "react-native-gesture-handler";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { RangeSlider } from "./range-slider";
 
@@ -196,7 +196,7 @@ export const PokemonFilterBottomSheet = forwardRef<
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
-            className="flex-row gap-2.5"
+            contentContainerClassName="flex-row gap-2"
           >
             {SORTED_TYPES.map((type) => (
               <TypeChip
@@ -213,7 +213,7 @@ export const PokemonFilterBottomSheet = forwardRef<
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
-            className="flex-row gap-2.5"
+            contentContainerClassName="flex-row gap-2"
           >
             {SORTED_TYPES.map((type) => (
               <TypeChip
@@ -227,7 +227,7 @@ export const PokemonFilterBottomSheet = forwardRef<
         </FilterSection>
 
         <FilterSection title="Heights">
-          <View className="flex-row gap-2.5">
+          <View className="flex-row gap-2">
             {HEIGHT_OPTIONS.map((opt) => (
               <OptionChip
                 key={opt.key}
@@ -241,7 +241,7 @@ export const PokemonFilterBottomSheet = forwardRef<
         </FilterSection>
 
         <FilterSection title="Weights">
-          <View className="flex-row gap-2.5">
+          <View className="flex-row gap-2">
             {WEIGHT_OPTIONS.map((opt) => (
               <OptionChip
                 key={opt.key}
@@ -313,8 +313,13 @@ const TypeChip = React.memo(function TypeChip({
   return (
     <Pressable onPress={onPress} className="items-center">
       <View
-        className="w-[50px] h-[50px] rounded-full justify-center items-center"
         style={{
+          width: 50,
+          height: 50,
+          borderRadius: 25,
+          overflow: "hidden",
+          justifyContent: "center",
+          alignItems: "center",
           backgroundColor: selected ? type.foregroundColor : "transparent",
         }}
       >
@@ -342,8 +347,13 @@ const OptionChip = React.memo(function OptionChip({
   return (
     <Pressable onPress={onPress} className="items-center">
       <View
-        className="w-[50px] h-[50px] rounded-full justify-center items-center"
         style={{
+          width: 50,
+          height: 50,
+          borderRadius: 25,
+          overflow: "hidden",
+          justifyContent: "center",
+          alignItems: "center",
           backgroundColor: selected ? backgroundColor : "transparent",
         }}
       >

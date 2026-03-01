@@ -5,7 +5,6 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { usePokemonListContext } from "../context/pokemon-list-context";
 import { useCallback, useMemo } from "react";
 import type { LayoutChangeEvent } from "react-native";
-import { LightColors } from "@/constants/theme";
 
 interface PokemonListHeaderProps {
   onFilterPress?: () => void;
@@ -42,7 +41,7 @@ export const PokemonListHeader = ({ onFilterPress, onSortPress, onGenerationPres
         imageStyle={{
           resizeMode: "cover",
           position: "absolute",
-          top: 30,
+          top: -10,
         }}
       >
         <View style={{flex: 1, marginTop: insets.top }}>
