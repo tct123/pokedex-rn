@@ -143,6 +143,11 @@ function mapApiResponseToPokemon(p: PokemonApiResponse): Pokemon {
     baseHappiness: p.training.base_friendship,
     growthRate: p.training.growth_rate,
     baseExperience: p.training.base_experience,
+    gender: {
+      malePercent: p.about.gender.male_percent,
+      femalePercent: p.about.gender.female_percent,
+      isGenderless: p.about.gender.is_genderless,
+    },
     evolutionChain: mapEvolutionChain(p.evolution_chain),
     weakNesses: p.about.weaknesses.map((w) => mapResponseTypeToPokemonType(w)),
     locations: p.locations.map((loc) => ({

@@ -1,51 +1,11 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
-
-## Commands
-
-- `npm start` — Start Expo dev server
-- `npm run ios` — Run on iOS
-- `npm run android` — Run on Android
-- `npm run lint` — Lint with ESLint (expo lint)
-- `npm test` — Run Jest in watch mode (`jest --watchAll`)
-- `npx jest --testPathPattern=<path>` — Run a single test file
-
-## Architecture
-
-This is a React Native Pokédex app built with **Expo 54**, **Expo Router**, and **TypeScript (strict mode)**. It follows **Feature-Sliced Design (FSD)** architecture.
-
-### Layer structure (top-down dependency flow)
-
-- **`app/`** — Expo Router file-based routing. Root layout with Stack navigation, routes to list and details pages.
-- **`pages/`** — Page compositions that wire together widgets, features, and entities. Each page has its own hooks and components subdirectories.
-- **`widgets/`** — Composite UI blocks (e.g., the pokemon list widget).
-- **`features/`** — Isolated business features as custom hooks: `load-pokemons` (pagination), `filter-pokemon-list` (debounced search), `fetch-pokemon-by-id`.
-- **`entities/`** — Business entities. `pokemon` has `model/` (interfaces), `api/` (fetching + mappers), and `ui/` (PokemonCard).
-- **`components/ui/`** — Shared presentational components (Badge, SearchBar, IconButton, PokemonInfo).
-- **`shared/api/`** — API layer (currently legacy, to be removed).
-- **`shared/lib/`** — Shared utilities: `query-client.ts` (React Query config), `query-keys.ts` (query key factory).
-- **`constants/`** — Theme (Material Design 3 colors, fonts).
-
-Each FSD slice exports via `index.ts` public API. Layers only import from layers below them.
-
-### Key patterns
-
-- **Custom hooks** return `{ state, actions }` tuples with memoized values to prevent re-renders.
-- **React Query** for server state management with automatic caching, background refetching, and optimistic updates.
-  - Query keys follow a hierarchical structure: `pokemonKeys.lists()`, `pokemonKeys.detail(id)`
-  - Cache configuration: 5 min stale time (Pokemon data is static), 10 min garbage collection
-  - Queries use `useQuery` for single items, `useInfiniteQuery` for paginated lists
-- **Path alias**: `@/*` maps to project root (configured in `tsconfig.json`).
-- **Pokemon types** are classes implementing `PokemonType` interface, each with name, icon, and color theming.
-
-### Testing
-
-Uses `jest-expo` preset with `@testing-library/react-native`. Tests are colocated in `__tests__/` directories alongside source.
-
-**Testing with React Query:**
-- Mock API functions at module level using `jest.mock('@/entities/pokemon/api/pokemon-api')`
-- Wrap hooks with `createWrapper()` from `@/shared/test-utils/react-query-wrapper`
-- Use `renderHook()` with `{ wrapper: createWrapper() }` for proper QueryClient context
-- Use `waitFor()` from testing-library to await async state updates
-- Each test gets a fresh QueryClient with `retry: false` and `gcTime: 0` for faster tests
+- Whenever its possible, run subagents in parallel to do the work
+- Ever make sure tests and lints are passing after finishing your job
+- Make sure that isnt usage of deprecated methods, except if user explicity agree
+- Every unit test must not mock any component, only the edges like repositories, data-sources, timers etc.
+- Focus on testing behavior and not code it self, it creates smarter tests.
+- Avoid making comments at code, do it only if its really necessary, but if it is, rethink about the solution because most of the time good functions doesnt need comments to be understand.
+- Follow react-native best practices when creating components, pages and hooks. Avoid unecessary re-renders and commit with single responsibility principle.
+- Use context and lift up state when needed.
+- Whenever changing code, doesnt change its behavior unless it is really wrong, ask me if its the case.
