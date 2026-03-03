@@ -10,6 +10,7 @@ import { usePokemonListContext } from "../context/pokemon-list-context";
 import { router } from "expo-router";
 import type { ListItem } from "../hooks/use-pokemon-list-data";
 import type { Pokemon } from "@/entities/pokemon";
+import { ClearFiltersPill } from "./clear-filters-pill";
 
 export const PokemonSearchBarItem = memo(function PokemonSearchBarItem() {
   const { isSticky, searchText, handleSearch } = usePokemonListContext();
@@ -21,7 +22,7 @@ export const PokemonSearchBarItem = memo(function PokemonSearchBarItem() {
 
   return (
     <Animated.View
-      className="bg-white px-4 pb-4 pt-3 overflow-visible"
+      className="bg-white px-4 pb-4 pt-3"
       style={stickyPaddingStyle}
     >
       <SearchBar
@@ -36,6 +37,9 @@ export const PokemonSearchBarItem = memo(function PokemonSearchBarItem() {
 export function PokemonListItem({ item }: { item: ListItem }) {
   if (item.type === "search") {
     return <PokemonSearchBarItem />;
+  }
+  if (item.type === "clear-filters") {
+    return <ClearFiltersPill />;
   }
   if (item.type === "empty") {
     return (
