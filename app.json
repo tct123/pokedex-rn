@@ -1,27 +1,27 @@
 {
   "expo": {
-    "name": "Pokedex",
-    "slug": "pokedex",
+    "name": "Pokebase",
+    "slug": "pokebase",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "pokedex",
+    "scheme": "pokebase",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.mouzinho.pokedex"
+      "bundleIdentifier": "com.mouzinho.pokebase"
     },
     "android": {
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
+        "backgroundColor": "#6A3794",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
         "backgroundImage": "./assets/images/android-icon-background.png",
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
-      "package": "com.mouzinho.pokedex"
+      "package": "com.mouzinho.pokebase"
     },
     "web": {
       "output": "static",
@@ -33,7 +33,7 @@
         "expo-splash-screen",
         {
           "image": "./assets/images/splash-icon.png",
-          "imageWidth": 200,
+          "imageWidth": 150,
           "resizeMode": "contain",
           "backgroundColor": "#ffffff",
           "dark": {
@@ -45,8 +45,8 @@
       [
         "expo-media-library",
         {
-          "photosPermission": "Allow Pokédex to save card images to your photo library.",
-          "savePhotosPermission": "Allow Pokédex to save card images to your photo library.",
+          "photosPermission": "Allow Pokébase to save card images to your photo library.",
+          "savePhotosPermission": "Allow Pokébase to save card images to your photo library.",
           "isAccessMediaLocationEnabled": false
         }
       ]
