@@ -1,5 +1,7 @@
 # Pokédex - React Native App
 
+[<img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png" alt="Get it on F-Droid" height="80">](https://f-droid.org/packages/com.mouzinho.pokebase)
+
 A modern Pokédex application built with React Native, Expo, and TypeScript, following **Feature-Sliced Design (FSD)** architecture principles.
 
 ## 📱 Features
