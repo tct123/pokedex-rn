@@ -2,7 +2,7 @@
   "expo": {
     "name": "Pokebase",
     "slug": "pokebase",
-    "version": "1.0.1",
+    "version": "1.0.2",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "pokebase",
@@ -13,7 +13,7 @@
       "bundleIdentifier": "com.mouzinho.pokebase"
     },
     "android": {
-      "versionCode": 2,
+      "versionCode": 3,
       "adaptiveIcon": {
         "backgroundColor": "#6A3794",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
